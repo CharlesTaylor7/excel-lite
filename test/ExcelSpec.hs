@@ -13,4 +13,4 @@ spec = do
         excel = newSheet
         cellId = CellId 0
         value = readCell cellId . setCell cellId (Lit 2) $ excel
-      value `shouldBe` 2
+      value `shouldBe` CellValue 2

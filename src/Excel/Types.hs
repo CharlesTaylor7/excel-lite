@@ -11,6 +11,7 @@ data Expr where
 
 newtype CellId = CellId Natural
 newtype CellValue = CellValue Int
+  deriving (Show, Eq)
 
 data Cell = Cell
   { _cell_value :: CellValue
