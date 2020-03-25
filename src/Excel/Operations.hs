@@ -12,5 +12,5 @@ readExpr = undefined
 setCell :: CellId -> Expr -> Excel -> Excel
 setCell = undefined
 
-readCell :: Excel -> CellId -> CellValue
+readCell :: CellId -> Excel -> CellValue
 readCell = undefined

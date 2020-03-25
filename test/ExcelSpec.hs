@@ -4,8 +4,13 @@ import Excel
 import Test.QuickCheck
 import Test.Hspec
 
+test = it
+
 spec = do
   describe "Excel" $ do
-      it "TODO: Implement test suite" $ do
-        error "Test suite not implemented"
-        1 `shouldBe` -1
+    test "literals: readCell gets the literal value set" $ do
+      let
+        excel = newSheet
+        cellId = CellId 0
+        value = readCell cellId . setCell cellId (Lit 2) $ excel
+      value `shouldBe` 2
