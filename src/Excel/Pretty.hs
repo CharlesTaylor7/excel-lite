@@ -9,9 +9,8 @@ prettyPrint = putStrLn . pretty
 class Pretty a where
   pretty :: a -> String
 
-instance Pretty Excel where
-  pretty excel =
-    excel ^. _Excel . folded . to pretty
+instance Pretty Sheet where
+  pretty = view $ sheet_cells . folded . to pretty
 
 instance Pretty Expr where
   pretty (Lit x) = pretty x
@@ -30,7 +29,7 @@ instance Pretty Int where
   pretty = show
 
 instance (Pretty a, Pretty b, Pretty c) => Pretty (a, b, c) where
-  pretty (a, b, c) = "(" <> joined <> ")"
+  pretty (a, b, c) = "[" <> joined <> "]"
     where joined = intercalate ", " [pretty a, pretty b, pretty c]
 
 instance (Pretty a, Pretty b) => Pretty (Either a b) where

@@ -29,13 +29,14 @@ data Cell = Cell
   }
   deriving (Show)
 
-newtype Excel = Excel
-  { _excel_cells :: Map CellId Cell
+data Sheet = Sheet
+  { _sheet_cells :: Map CellId Cell
+  , _sheet_maxId :: CellId
   }
   deriving (Show)
 
 makeLenses ''Expr
 makeLenses ''Cell
-makePrisms ''Excel
+makeLenses ''Sheet
 makePrisms ''EvalError
 makePrisms ''CellId

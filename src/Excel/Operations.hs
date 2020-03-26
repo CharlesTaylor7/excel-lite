@@ -9,8 +9,8 @@ import Internal.Imports
 import Excel.Types
 import qualified RIO.Map as Map
 
-emptySheet :: Excel
-emptySheet = Excel Map.empty
+emptySheet :: Sheet
+emptySheet = Sheet Map.empty $ CellId 0
 
 emptyCell :: Cell
 emptyCell = Cell
@@ -19,12 +19,12 @@ emptyCell = Cell
   , _cell_dependents = []
   }
 
-setCell :: CellId -> Expr -> Excel -> Excel
+setCell :: CellId -> Expr -> Sheet -> Sheet
 setCell id expr sheet =
   let
     pushDep sheet dep =
       sheet
-      & _Excel . at dep %~
+      & sheet_cells . at dep %~
         Just .
         (cell_dependents %~ (id:)) .
         maybe emptyCell identity
@@ -34,7 +34,7 @@ setCell id expr sheet =
 
     applyNewCell sheet =
       sheet
-      & _Excel . at id ?~ (
+      & sheet_cells . at id ?~ (
         emptyCell
         & cell_expression ?~ expr
         & cell_value .~ eval expr sheet)
@@ -43,17 +43,17 @@ setCell id expr sheet =
       & pushDeps
       & applyNewCell
 
-readCell :: CellId -> Excel -> Either EvalError Domain
+readCell :: CellId -> Sheet -> Either EvalError Domain
 readCell id excel =
   let
-    val = excel ^? _Excel . ix id . cell_value
+    val = excel ^? sheet_cells . ix id . cell_value
   in
     join . toEither EmptyCell $ val
   where
     toEither :: a -> Maybe b -> Either a b
     toEither a = maybe (Left a) Right
 
-eval :: Expr -> Excel -> Either EvalError Domain
+eval :: Expr -> Sheet -> Either EvalError Domain
 eval (Lit num) _ = pure num
 eval (Ref id) excel =
   readCell id excel ^? _Right
