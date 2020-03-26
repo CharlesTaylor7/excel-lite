@@ -11,25 +11,28 @@ data Expr where
   Ref :: CellId -> Expr
   Add :: Expr -> Expr -> Expr
   Multiply :: Expr -> Expr -> Expr
+  deriving (Show)
 
 data EvalError
   = EmptyCell
   | InvalidRef
   | CyclicReference
-  deriving (Eq, Show)
+  deriving (Show, Eq)
 
 newtype CellId = CellId Natural
-  deriving (Eq, Ord)
+  deriving (Show, Eq, Ord)
 
 data Cell = Cell
   { _cell_value :: Either EvalError Domain
   , _cell_expression :: Maybe Expr
   , _cell_dependents:: [CellId]
   }
+  deriving (Show)
 
 newtype Excel = Excel
   { _excel_cells :: Map CellId Cell
   }
+  deriving (Show)
 
 makeLenses ''Expr
 makeLenses ''Cell
