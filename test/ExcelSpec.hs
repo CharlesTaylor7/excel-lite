@@ -29,7 +29,7 @@ spec = do
               & setCell id2 (Lit 5)
           readCell id1 sheet `shouldBe` pure 5
 
-        test "reports no ref when ref doesnt exist " $ do
+        test "reports no ref when ref doesn't exist " $ do
           let
             id = CellId 0
             sheet = emptySheet & setCell id (Ref . CellId $ 2)

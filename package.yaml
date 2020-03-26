@@ -22,6 +22,8 @@ dependencies:
 - base >= 4.7 && < 5
 - rio
 - lens
+- mtl
+- transformers
 
 default-extensions:
   - NoImplicitPrelude
