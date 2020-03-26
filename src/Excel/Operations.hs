@@ -12,5 +12,8 @@ readExpr = undefined
 setCell :: CellId -> Expr -> Excel -> Excel
 setCell = undefined
 
-readCell :: CellId -> Excel -> CellValue
+readCell :: CellId -> Excel -> Either EvalError Domain
 readCell = undefined
+
+eval :: Expr -> Excel -> Either EvalError Domain
+eval (Lit num) _ = pure num
