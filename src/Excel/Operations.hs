@@ -4,58 +4,71 @@ import Internal.Imports
 import Excel.Types
 import qualified RIO.Map as Map
 
-emptySheet :: Sheet
-emptySheet = Sheet Map.empty $ CellId 0
+emptySheet :: Sheet a
+emptySheet = Sheet Map.empty
 
-emptyCell :: Cell
-emptyCell = Cell
-  { _cell_value = Left EmptyCell
-  , _cell_expression = Nothing
-  , _cell_dependents = []
-  }
+setCell :: CellId -> Expr -> SheetCells -> SheetCells
+setCell id expr = _Sheet . at id ?~ expr
 
-modifyCell :: (Cell -> a) -> Maybe Cell -> Maybe a
-modifyCell f = Just . f . maybe emptyCell identity
-
-setCell :: CellId -> Expr -> Sheet -> Sheet
-setCell id expr sheet =
+readCell :: CellId -> SheetCells -> CellValue
+readCell id sheet =
   let
-    pushDep sheet dep =
-      sheet
-      & sheet_cells . at dep
-      %~ modifyCell (cell_dependents %~ (id:))
-
-    pushDeps sheet =
-      foldl' pushDep sheet $ dependencies expr
-
-    applyNewCell sheet =
-      sheet
-      & sheet_cells . at id
-      %~ modifyCell (
-        (cell_value .~ eval expr sheet) .
-        (cell_expression ?~ expr)
-      )
-  in
-    sheet
-      & pushDeps
-      & applyNewCell
-
-readCell :: CellId -> Sheet -> Either EvalError Domain
-readCell id excel =
-  let
-    val = excel ^? sheet_cells . ix id . cell_value
+    val = evalSheet sheet ^? _Sheet . ix id
   in
     join . toEither EmptyCell $ val
   where
     toEither :: a -> Maybe b -> Either a b
     toEither a = maybe (Left a) Right
 
-eval :: Expr -> Sheet -> Either EvalError Domain
-eval (Lit num) _ = pure num
-eval (Ref id) excel =
-  readCell id excel ^? _Right
-  & maybe (Left InvalidRef) Right
+evalSheet :: SheetCells -> SheetValues
+evalSheet sheet =
+  flip execState emptySheet $
+  flip runReaderT sheet $
+  runExceptT $
+  iforOf_ (_Sheet . ifolded) sheet $ evalNext . Just
 
-dependencies :: Expr -> [CellId]
-dependencies (Lit _) = []
-dependencies (Ref id) = [id]
+runMaybe :: Maybe a -> b -> (a -> b) -> b
+runMaybe may b f = maybe b f may
+
+evalNext ::
+         ( MonadReader SheetCells m
+         , MonadState SheetValues m
+         )
+         => Maybe CellId
+         -> Expr
+         -> m CellValue
+evalNext maybeId expr = do
+  val <- runMaybe maybeId (pure Nothing) $
+    \id -> use $ _Sheet . at id
+  case val of
+    Just x -> pure x
+    Nothing -> do
+      runMaybe maybeId (eval expr) $
+        \id -> do
+          _Sheet . at id ?= Left CyclicReference
+          val <- eval expr
+          _Sheet . at id ?= val
+          pure val
+
+eval ::
+     ( MonadReader SheetCells m
+     , MonadState SheetValues m
+     )
+     => Expr
+     -> m CellValue
+eval = \case
+  Lit num -> pure . pure $ num
+  Ref refId -> do
+    cellExpr <- view $ _Sheet . at refId
+    runMaybe cellExpr
+      (pure $ Left InvalidRef)
+      (evalNext (Just refId))
+  Add expr1 expr2 -> runOp (+) expr1 expr2
+  Multiply expr1 expr2 -> runOp (*) expr1 expr2
+  where
+    runOp op expr1 expr2 =
+      let
+        proc = ExceptT . evalNext Nothing
+      in
+        runExceptT $
+          liftA2 op (proc expr1) (proc expr2)

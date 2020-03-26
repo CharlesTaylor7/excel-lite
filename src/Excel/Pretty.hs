@@ -9,15 +9,12 @@ prettyPrint = putStrLn . pretty
 class Pretty a where
   pretty :: a -> String
 
-instance Pretty Sheet where
-  pretty = view $ sheet_cells . folded . to pretty
+instance Pretty a => Pretty (Sheet a) where
+  pretty = view $ _Sheet . folded . to pretty
 
 instance Pretty Expr where
   pretty (Lit x) = pretty x
   pretty (Ref id) = pretty id
-
-instance Pretty Cell where
-  pretty (Cell a b c) = pretty (a, b, c)
 
 instance Pretty CellId where
   pretty = ('$':) . show . view _CellId

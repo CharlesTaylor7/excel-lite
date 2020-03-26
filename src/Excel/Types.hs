@@ -23,20 +23,20 @@ newtype CellId = CellId Natural
   deriving (Show, Eq, Ord)
 
 data Cell = Cell
-  { _cell_value :: Either EvalError Domain
-  , _cell_expression :: Maybe Expr
-  , _cell_dependents:: [CellId]
+  { _cell_id :: CellId
+  , _cell_expr :: Expr
   }
-  deriving (Show)
 
-data Sheet = Sheet
-  { _sheet_cells :: Map CellId Cell
-  , _sheet_maxId :: CellId
-  }
-  deriving (Show)
+newtype Sheet cell = Sheet (Map CellId cell)
+  deriving (Show, Eq, Functor)
+
+type CellValue = Either EvalError Domain
+
+type SheetCells = Sheet Expr
+type SheetValues = Sheet CellValue
 
 makeLenses ''Expr
 makeLenses ''Cell
-makeLenses ''Sheet
+makePrisms ''Sheet
 makePrisms ''EvalError
 makePrisms ''CellId

@@ -12,12 +12,6 @@ spec = do
       test "reports EmptyCell when cell is not initialized" $ do
         readCell (CellId 0) emptySheet `shouldBe` Left EmptyCell
 
-      test "reports EmptyCell when cell is initialized, but empty" $ do
-        let
-          id = CellId 7
-          sheet = emptySheet & sheet_cells . at id ?~ emptyCell
-        readCell id sheet `shouldBe` Left EmptyCell
-
       describe "literals" $ do
         test "gets the literal value set" $ do
           let
@@ -35,7 +29,7 @@ spec = do
               & setCell id2 (Lit 5)
           readCell id1 sheet `shouldBe` pure 5
 
-        test "reports no ref when ref doesnt exist " $ do
+        test "reports no ref when ref doesn't exist " $ do
           let
             id = CellId 0
             sheet = emptySheet & setCell id (Ref . CellId $ 2)
@@ -49,9 +43,47 @@ spec = do
             value = readCell id sheet
           value `shouldBe` Left CyclicReference
 
-        test "reports cyclic ref when ref refers to itself " $ do
+        test "reports cyclic ref when refs refer to each other " $
           let
-            id = CellId 0
-            sheet = emptySheet & setCell id (Ref id)
-            value = readCell id sheet
-          value `shouldBe` Left CyclicReference
+            id1 = CellId 0
+            id2 = CellId 0
+            sheet = emptySheet
+              & setCell id1 (Ref id2)
+              & setCell id2 (Ref id1)
+            expectedSheet = emptySheet
+              & _Sheet . at id1 ?~ Left CyclicReference
+              & _Sheet . at id2 ?~ Left CyclicReference
+          in
+            evalSheet sheet `shouldBe` expectedSheet
+
+      test "addition" $
+        let
+          id1 = CellId 0
+          id2 = CellId 1
+          id3 = CellId 2
+          sheet = emptySheet
+            & setCell id1 (Lit 3)
+            & setCell id2 (Lit 5)
+            & setCell id3 (Add (Ref id1) (Ref id2))
+          expectedSheet = emptySheet
+            & _Sheet . at id1 ?~ pure 3
+            & _Sheet . at id2 ?~ pure 5
+            & _Sheet . at id3 ?~ pure 8
+        in
+          evalSheet sheet `shouldBe` expectedSheet
+
+      test "multiplication" $
+        let
+          id1 = CellId 0
+          id2 = CellId 1
+          id3 = CellId 2
+          sheet = emptySheet
+            & setCell id1 (Lit 3)
+            & setCell id2 (Lit 5)
+            & setCell id3 (Multiply (Ref id1) (Ref id2))
+          expectedSheet = emptySheet
+            & _Sheet . at id1 ?~ pure 3
+            & _Sheet . at id2 ?~ pure 5
+            & _Sheet . at id3 ?~ pure 15
+        in
+          evalSheet sheet `shouldBe` expectedSheet
