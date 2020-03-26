@@ -10,7 +10,7 @@ class Pretty a where
   pretty :: a -> String
 
 instance Pretty a => Pretty (Sheet a) where
-  pretty = view $ sheet_cells . folded . to pretty
+  pretty = view $ _Sheet . folded . to pretty
 
 instance Pretty Expr where
   pretty (Lit x) = pretty x
