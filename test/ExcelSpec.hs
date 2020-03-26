@@ -12,12 +12,6 @@ spec = do
       test "reports EmptyCell when cell is not initialized" $ do
         readCell (CellId 0) emptySheet `shouldBe` Left EmptyCell
 
-      test "reports EmptyCell when cell is initialized, but empty" $ do
-        let
-          id = CellId 7
-          sheet = emptySheet & sheet_cells . at id ?~ emptyCell
-        readCell id sheet `shouldBe` Left EmptyCell
-
       describe "literals" $ do
         test "gets the literal value set" $ do
           let

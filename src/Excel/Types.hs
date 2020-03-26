@@ -25,11 +25,12 @@ newtype CellId = CellId Natural
 data Sheet cell = Sheet
   { _sheet_cells :: Map CellId cell
   }
-  deriving (Show)
+  deriving (Show, Functor)
+
 
 type CellValue = Either EvalError Domain
 
-type SheetExpressions = Sheet Expr
+type SheetCells = Sheet Expr
 type SheetValues = Sheet CellValue
 
 makeLenses ''Expr

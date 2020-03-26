@@ -30,6 +30,7 @@ default-extensions:
   - GeneralizedNewtypeDeriving
   - DeriveGeneric
   - DerivingStrategies
+  - DeriveFunctor
   - MultiParamTypeClasses
   - PartialTypeSignatures
   - MonoLocalBinds
