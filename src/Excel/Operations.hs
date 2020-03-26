@@ -7,11 +7,10 @@ import qualified RIO.Map as Map
 emptySheet :: Sheet
 emptySheet = Sheet Map.empty $ CellId 0
 
-emptyCell :: Cell
+newCell :: Cell
 emptyCell = Cell
   { _cell_value = Left EmptyCell
   , _cell_expression = Nothing
-  , _cell_dependents = []
   }
 
 modifyCell :: (Cell -> a) -> Maybe Cell -> Maybe a

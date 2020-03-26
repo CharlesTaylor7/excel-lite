@@ -22,21 +22,17 @@ data EvalError
 newtype CellId = CellId Natural
   deriving (Show, Eq, Ord)
 
-data Cell = Cell
-  { _cell_value :: Either EvalError Domain
-  , _cell_expression :: Maybe Expr
-  , _cell_dependents:: [CellId]
+data Sheet cell = Sheet
+  { _sheet_cells :: Map CellId cell
   }
   deriving (Show)
 
-data Sheet = Sheet
-  { _sheet_cells :: Map CellId Cell
-  , _sheet_maxId :: CellId
-  }
-  deriving (Show)
+type CellValue = Either EvalError Domain
+
+type SheetExpressions = Sheet Expr
+type SheetValues = Sheet CellValue
 
 makeLenses ''Expr
-makeLenses ''Cell
 makeLenses ''Sheet
 makePrisms ''EvalError
 makePrisms ''CellId
