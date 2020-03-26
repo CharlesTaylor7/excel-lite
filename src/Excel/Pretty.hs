@@ -10,7 +10,35 @@ class Pretty a where
   pretty :: a -> String
 
 instance Pretty Excel where
+  pretty excel =
+    excel ^. _Excel . folded . to pretty
 
 instance Pretty Expr where
+  pretty (Lit x) = pretty x
+  pretty (Ref id) = pretty id
 
 instance Pretty Cell where
+  pretty (Cell a b c) = pretty (a, b, c)
+
+instance Pretty CellId where
+  pretty = ('$':) . show . view _CellId
+
+instance Pretty EvalError where
+  pretty = show
+
+instance Pretty Int where
+  pretty = show
+
+instance (Pretty a, Pretty b, Pretty c) => Pretty (a, b, c) where
+  pretty (a, b, c) = "(" <> joined <> ")"
+    where joined = intercalate ", " [pretty a, pretty b, pretty c]
+
+instance (Pretty a, Pretty b) => Pretty (Either a b) where
+  pretty = pretty ||| pretty
+
+instance Pretty a => Pretty (Maybe a) where
+  pretty = maybe "Nothing" pretty
+
+instance Pretty a => Pretty [a] where
+  pretty as = "(" <> join as <> ")"
+    where join = intercalate ", " . map pretty
