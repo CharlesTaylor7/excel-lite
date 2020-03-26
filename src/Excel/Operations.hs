@@ -1,4 +1,9 @@
-module Excel.Operations where
+module Excel.Operations
+  ( emptySheet
+  , emptyCell
+  , setCell
+  , readCell
+  ) where
 
 import Internal.Imports
 import Excel.Types
@@ -13,9 +18,6 @@ emptyCell = Cell
   , _cell_expression = Nothing
   , _cell_dependentCells = []
   }
-
-readExpr :: String -> Maybe Expr
-readExpr = undefined
 
 setCell :: CellId -> Expr -> Excel -> Excel
 setCell id expr excel =
@@ -40,4 +42,5 @@ readCell id excel =
 eval :: Expr -> Excel -> Either EvalError Domain
 eval (Lit num) _ = pure num
 eval (Ref id) excel =
-  maybe (Left InvalidRef) Right $ readCell id excel ^? _Right
+  readCell id excel ^? _Right
+  & maybe (Left InvalidRef) Right

@@ -33,9 +33,7 @@ spec = do
             sheet = emptySheet
               & setCell id1 (Ref . CellId $ 2)
               & setCell id2 (Lit 5)
-            value = readCell id1 sheet
-
-          value `shouldBe` pure 5
+          readCell id1 sheet `shouldBe` pure 5
 
         test "reports no ref when ref doesnt exist " $ do
           let
