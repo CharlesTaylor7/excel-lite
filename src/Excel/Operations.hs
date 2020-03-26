@@ -21,9 +21,16 @@ readCell id sheet =
     toEither a = maybe (Left a) Right
 
 evalSheet :: SheetCells -> SheetValues
-evalSheet sheet = fmap mapper sheet
-  where
-    mapper = flip runReaderT sheet . eval
+evalSheet sheet =
+  flip execState emptySheet $
+  flip runReaderT sheet $
+  for_ (sheet ^. sheet_cells . to Map.toList) $ uncurry evalNext
+
+evalNext :: (MonadReader SheetCells m, MonadState SheetValues m)
+         => CellId
+         -> Expr
+         -> m ()
+evalNext = _
 
 eval :: (MonadReader SheetCells m, MonadError EvalError m)
      => Expr
