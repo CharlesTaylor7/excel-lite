@@ -42,7 +42,7 @@ spec = do
             id = CellId 0
             sheet = emptySheet & setCell id (Ref . CellId $ 2)
             value = readCell id sheet
-          value `shouldBe` Left NonexistentRef
+          value `shouldBe` Left InvalidRef
 
         test "reports cyclic ref when ref refers to itself " $ do
           let

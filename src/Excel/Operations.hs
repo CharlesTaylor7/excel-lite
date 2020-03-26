@@ -4,7 +4,6 @@ import Internal.Imports
 import Excel.Types
 import qualified RIO.Map as Map
 
-
 emptySheet :: Excel
 emptySheet = Excel Map.empty
 
@@ -33,7 +32,7 @@ readCell id excel =
   let
     val = excel ^? _Excel . ix id . cell_value
   in
-    join . toEither NonexistentRef $ val
+    join . toEither EmptyCell $ val
   where
     toEither :: a -> Maybe b -> Either a b
     toEither a = maybe (Left a) Right

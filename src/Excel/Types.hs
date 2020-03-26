@@ -14,9 +14,8 @@ data Expr where
 
 data EvalError
   = EmptyCell
-  | CyclicReference
   | InvalidRef
-  | NonexistentRef
+  | CyclicReference
   deriving (Eq, Show)
 
 newtype CellId = CellId Natural
