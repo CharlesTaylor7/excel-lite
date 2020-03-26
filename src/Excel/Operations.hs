@@ -10,9 +10,8 @@ readExpr :: String -> Maybe Expr
 readExpr = undefined
 
 setCell :: CellId -> Expr -> Excel -> Excel
-setCell id expr excel = undefined
-
-
+setCell id expr excel =
+  excel & _Excel . ix id . cell_value .~ eval expr excel
 
 readCell :: CellId -> Excel -> Either EvalError Domain
 readCell id excel =
