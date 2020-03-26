@@ -24,7 +24,7 @@ newtype CellId = CellId Natural
 data Cell = Cell
   { _cell_value :: Either EvalError Domain
   , _cell_expression :: Maybe Expr
-  , _cell_dependentCells:: [CellId]
+  , _cell_dependents:: [CellId]
   }
 
 newtype Excel = Excel

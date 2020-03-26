@@ -9,6 +9,7 @@ module Internal.Imports
   , module Data.List.NonEmpty
   , module Data.Ord
   , module Numeric.Natural
+  , identity
   ) where
 
 import Prelude (putStrLn, maximum, enumFromTo, getLine, read, repeat, zipWith)
@@ -22,6 +23,9 @@ import Data.Coerce(coerce)
 import Numeric.Natural
 
 -- rio
-import RIO hiding (Lens, Lens', Getting, ASetter, ASetter', lens, (^.), to, view, over, set, sets, first, second)
+import RIO hiding (Lens, Lens', Getting, ASetter, ASetter', lens, (^.), to, view, over, set, sets, first, second, id)
 
 import Control.Lens
+
+identity :: a -> a
+identity x = x

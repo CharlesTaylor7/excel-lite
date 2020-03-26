@@ -16,18 +16,32 @@ emptyCell :: Cell
 emptyCell = Cell
   { _cell_value = Left EmptyCell
   , _cell_expression = Nothing
-  , _cell_dependentCells = []
+  , _cell_dependents = []
   }
 
 setCell :: CellId -> Expr -> Excel -> Excel
-setCell id expr excel =
+setCell id expr sheet =
   let
-    val = eval expr excel
-    cell = emptyCell
-      & cell_expression ?~ expr
-      & cell_value .~ val
+    pushDep sheet dep =
+      sheet
+      & _Excel . at dep %~
+        Just .
+        (cell_dependents %~ (id:)) .
+        maybe emptyCell identity
+
+    pushDeps sheet =
+      foldl' pushDep sheet $ dependencies expr
+
+    applyNewCell sheet =
+      sheet
+      & _Excel . at id ?~ (
+        emptyCell
+        & cell_expression ?~ expr
+        & cell_value .~ eval expr sheet)
   in
-    excel & _Excel . at id ?~ cell
+    sheet
+      & pushDeps
+      & applyNewCell
 
 readCell :: CellId -> Excel -> Either EvalError Domain
 readCell id excel =
@@ -44,3 +58,7 @@ eval (Lit num) _ = pure num
 eval (Ref id) excel =
   readCell id excel ^? _Right
   & maybe (Left InvalidRef) Right
+
+dependencies :: Expr -> [CellId]
+dependencies (Lit _) = []
+dependencies (Ref id) = [id]
