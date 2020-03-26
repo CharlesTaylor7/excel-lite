@@ -13,7 +13,8 @@ data Expr where
   Multiply :: Expr -> Expr -> Expr
 
 data EvalError
-  = CyclicReference
+  = EmptyCell
+  | CyclicReference
   | InvalidRef
   | NonexistentRef
   deriving (Eq, Show)
@@ -23,14 +24,13 @@ newtype CellId = CellId Natural
 
 data Cell = Cell
   { _cell_value :: Either EvalError Domain
-  , _cell_expression :: Expr
+  , _cell_expression :: Maybe Expr
   , _cell_dependentCells:: [CellId]
   }
 
 newtype Excel = Excel
   { _excel_cells :: Map CellId Cell
   }
-  deriving (Semigroup, Monoid)
 
 makeLenses ''Expr
 makeLenses ''Cell
