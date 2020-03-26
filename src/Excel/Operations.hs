@@ -39,3 +39,5 @@ readCell id excel =
 
 eval :: Expr -> Excel -> Either EvalError Domain
 eval (Lit num) _ = pure num
+eval (Ref id) excel =
+  maybe (Left InvalidRef) Right $ readCell id excel ^? _Right
