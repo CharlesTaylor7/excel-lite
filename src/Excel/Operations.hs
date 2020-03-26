@@ -4,13 +4,15 @@ import Internal.Imports
 import Excel.Types
 
 newSheet :: Excel
-newSheet = undefined
+newSheet = mempty
 
 readExpr :: String -> Maybe Expr
 readExpr = undefined
 
 setCell :: CellId -> Expr -> Excel -> Excel
-setCell = undefined
+setCell id expr excel = undefined
+
+
 
 readCell :: CellId -> Excel -> Either EvalError Domain
 readCell id excel =

@@ -30,6 +30,7 @@ data Cell = Cell
 newtype Excel = Excel
   { _excel_cells :: Map CellId Cell
   }
+  deriving (Semigroup, Monoid)
 
 makeLenses ''Expr
 makeLenses ''Cell
