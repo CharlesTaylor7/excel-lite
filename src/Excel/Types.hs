@@ -19,6 +19,7 @@ data EvalError
   deriving (Eq, Show)
 
 newtype CellId = CellId Natural
+  deriving (Eq, Ord)
 
 data Cell = Cell
   { _cell_value :: Either EvalError Domain
@@ -26,12 +27,12 @@ data Cell = Cell
   , _cell_dependentCells:: [CellId]
   }
 
-data Excel = Excel
+newtype Excel = Excel
   { _excel_cells :: Map CellId Cell
   }
 
 makeLenses ''Expr
 makeLenses ''Cell
-makeLenses ''Excel
+makePrisms ''Excel
 makePrisms ''EvalError
 makePrisms ''CellId
