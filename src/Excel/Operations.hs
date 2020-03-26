@@ -21,31 +21,27 @@ readCell id sheet =
     toEither a = maybe (Left a) Right
 
 evalSheet :: SheetCells -> SheetValues
-evalSheet sheet =
-  flip execState emptySheet $
-  flip runReaderT sheet $
-  for_ (sheet ^. _Sheet . to Map.toList) $ uncurry evalNext
+evalSheet sheet = undefined
+  -- flip execState emptySheet $
+  -- flip runReaderT sheet $
+  -- for_ (sheet ^. _Sheet . to Map.toList) $ uncurry evalNext
 
-evalNext :: (MonadReader SheetCells m, MonadState SheetValues m)
-         => CellId
-         -> Expr
-         -> m ()
-evalNext id expr =
+evalNext :: CellId -> Expr -> SheetCells -> SheetValues -> (SheetValues, CellValue)
+evalNext id expr cells vals =
   let
+    getVal :: CellId -> SheetValues -> Maybe CellValue
+    getVal id = preview $ _Sheet . ix id
+
+    val :: CellValue
     val = case expr of
       Lit num -> pure num
-      Ref id ->
-        view (_Sheet . at id) >>=
-        maybe (throwError InvalidRef) (evalNext id)
+      Ref id -> do
+        cell <- view $ _Sheet . at id
+        cell & maybe (throwError InvalidRef) (evalNext id)
+        getVal id
+
   in do
-    values <- get
+    values <- _
     let cached = values ^? _Sheet . ix id
     let result = maybe val identity cached
     _Sheet . at id ?= result
--- eval :: (MonadReader SheetCells m, MonadError EvalError m)
---      => Expr
---      -> m Domain
--- eval (Lit num) = pure num
--- eval (Ref id) =
---   view (_Sheet . at id) >>=
---     maybe (throwError InvalidRef) eval
