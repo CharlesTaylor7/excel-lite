@@ -1,9 +1,4 @@
-module Excel.Operations
-  ( emptySheet
-  , emptyCell
-  , setCell
-  , readCell
-  ) where
+module Excel.Operations where
 
 import Internal.Imports
 import Excel.Types
@@ -19,25 +14,27 @@ emptyCell = Cell
   , _cell_dependents = []
   }
 
+modifyCell :: (Cell -> a) -> Maybe Cell -> Maybe a
+modifyCell f = Just . f . maybe emptyCell identity
+
 setCell :: CellId -> Expr -> Sheet -> Sheet
 setCell id expr sheet =
   let
     pushDep sheet dep =
       sheet
-      & sheet_cells . at dep %~
-        Just .
-        (cell_dependents %~ (id:)) .
-        maybe emptyCell identity
+      & sheet_cells . at dep
+      %~ modifyCell (cell_dependents %~ (id:))
 
     pushDeps sheet =
       foldl' pushDep sheet $ dependencies expr
 
     applyNewCell sheet =
       sheet
-      & sheet_cells . at id ?~ (
-        emptyCell
-        & cell_expression ?~ expr
-        & cell_value .~ eval expr sheet)
+      & sheet_cells . at id
+      %~ modifyCell (
+        (cell_value .~ eval expr sheet) .
+        (cell_expression ?~ expr)
+      )
   in
     sheet
       & pushDeps
