@@ -27,20 +27,25 @@ evalSheet sheet =
   traverse_ (uncurry evalNext) $
     sheet ^.. _Sheet . folding Map.toList . to (_1 %~ Just)
 
+runMaybe :: Maybe a -> b -> (a -> b) -> b
+runMaybe may b f = maybe b f may
+
+whenJust :: Applicative m => Maybe a -> (a -> m ()) -> m ()
+whenJust may f = maybe (pure ()) f may
+
 evalNext :: (MonadReader SheetCells m, MonadState SheetValues m)
          => Maybe CellId
          -> Expr
          -> m CellValue
 evalNext maybeId expr = do
-  val <- case maybeId of
-    Just id -> use $ _Sheet . at id
-    Nothing -> pure Nothing
+  val <- runMaybe maybeId (pure Nothing) $
+    \id -> use $ _Sheet . at id
   case val of
     Just x -> pure x
     Nothing -> do
-      case maybeId of
-        Just id ->  _Sheet . at id ?= Left CyclicReference
-        Nothing -> pure ()
+      whenJust maybeId $
+        \id -> _Sheet . at id ?= Left CyclicReference
+
       val <- case expr of
         Lit num -> pure . pure $ num
         Ref refId -> do
@@ -56,8 +61,8 @@ evalNext maybeId expr = do
           val1 <- evalNext Nothing expr1
           val2 <- evalNext Nothing expr2
           pure $ liftA2 (*) val1 val2
-      case maybeId of
-        Just id -> _Sheet . at id ?= val
-        Nothing -> pure ()
+
+      whenJust maybeId $
+        \id -> _Sheet . at id ?= val
 
       pure val
