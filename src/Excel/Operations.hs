@@ -43,26 +43,28 @@ evalNext maybeId expr = do
   case val of
     Just x -> pure x
     Nothing -> do
-      whenJust maybeId $
-        \id -> _Sheet . at id ?= Left CyclicReference
+      runMaybe maybeId (eval expr) $
+        \id -> do
+          _Sheet . at id ?= Left CyclicReference
+          val <- eval expr
+          _Sheet . at id ?= val
+          pure val
 
-      val <- case expr of
-        Lit num -> pure . pure $ num
-        Ref refId -> do
-          cell_expr <- view $ _Sheet . at refId
-          case cell_expr of
-            Nothing -> pure $ Left InvalidRef
-            Just expr -> evalNext (Just refId) expr
-        Add expr1 expr2 -> do
-          val1 <- evalNext Nothing expr1
-          val2 <- evalNext Nothing expr2
-          pure $ liftA2 (+) val1 val2
-        Multiply expr1 expr2 -> do
-          val1 <- evalNext Nothing expr1
-          val2 <- evalNext Nothing expr2
-          pure $ liftA2 (*) val1 val2
-
-      whenJust maybeId $
-        \id -> _Sheet . at id ?= val
-
-      pure val
+eval :: (MonadReader SheetCells m, MonadState SheetValues m)
+     => Expr
+     -> m (Either EvalError Domain)
+eval = \case
+  Lit num -> pure . pure $ num
+  Ref refId -> do
+    cell_expr <- view $ _Sheet . at refId
+    case cell_expr of
+      Nothing -> pure $ Left InvalidRef
+      Just expr -> evalNext (Just refId) expr
+  Add expr1 expr2 -> do
+    val1 <- evalNext Nothing expr1
+    val2 <- evalNext Nothing expr2
+    pure $ liftA2 (+) val1 val2
+  Multiply expr1 expr2 -> do
+    val1 <- evalNext Nothing expr1
+    val2 <- evalNext Nothing expr2
+    pure $ liftA2 (*) val1 val2
