@@ -39,7 +39,7 @@ evalNext ::
          )
          => Maybe CellId
          -> Expr
-         -> m Domain
+         -> m CellValue
 evalNext maybeId expr = do
   val <- runMaybe maybeId (pure Nothing) $
     \id -> use $ _Sheet . at id
@@ -56,22 +56,22 @@ evalNext maybeId expr = do
 eval ::
      ( MonadReader SheetCells m
      , MonadState SheetValues m
-     , MonadError EvalError m
      )
      => Expr
-     -> m Domain
+     -> m CellValue
 eval = \case
-  Lit num -> pure num
+  Lit num -> pure . pure $ num
   Ref refId -> do
     cellExpr <- view $ _Sheet . at refId
     runMaybe cellExpr
       (pure $ Left InvalidRef)
       (evalNext (Just refId))
-  Add expr1 expr2 -> do
-    val1 <- _evalNext Nothing expr1
-    val2 <- _evalNext Nothing expr2
-    pure $ liftA2 (+) val1 val2
-  Multiply expr1 expr2 -> do
-    val1 <- _evalNext Nothing expr1
-    val2 <- _evalNext Nothing expr2
-    pure $ liftA2 (*) val1 val2
+  Add expr1 expr2 -> runOp (+) expr1 expr2
+  Multiply expr1 expr2 -> runOp (*) expr1 expr2
+  where
+    runOp op expr1 expr2 =
+      let
+        proc = ExceptT . evalNext Nothing
+      in
+        runExceptT $
+          liftA2 op (proc expr1) (proc expr2)
