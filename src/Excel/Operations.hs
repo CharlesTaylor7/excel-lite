@@ -26,22 +26,38 @@ evalSheet sheet = undefined
   -- flip runReaderT sheet $
   -- for_ (sheet ^. _Sheet . to Map.toList) $ uncurry evalNext
 
-evalNext :: CellId -> Expr -> SheetCells -> SheetValues -> (SheetValues, CellValue)
-evalNext id expr cells vals =
-  let
-    getVal :: CellId -> SheetValues -> Maybe CellValue
-    getVal id = preview $ _Sheet . ix id
+evalNext :: (MonadReader SheetCells m, MonadState SheetValues m)
+         => CellId
+         -> Expr
+         -> m CellValue
+evalNext id expr = do
+  val <- use $ _Sheet . at id
+  case val of
+    Just x -> pure x
+    Nothing -> do
+      val <- case expr of
+        Lit num -> pure . pure $ num
+        Ref id -> do
+          cell_expr <- view $ _Sheet . at id
+          case cell_expr of
+            Nothing -> pure $ Left InvalidRef
+            Just expr -> evalNext id expr
+      _Sheet . at id ?= val
+      pure val
+          -- let foo = maybe (Left InvalidRef) (_ . evalNext id) cell
+          -- pure foo
 
-    val :: CellValue
-    val = case expr of
-      Lit num -> pure num
-      Ref id -> do
-        cell <- view $ _Sheet . at id
-        cell & maybe (throwError InvalidRef) (evalNext id)
-        getVal id
-
-  in do
-    values <- _
-    let cached = values ^? _Sheet . ix id
-    let result = maybe val identity cached
-    _Sheet . at id ?= result
+  --   val :: m CellValue
+  --   val = case expr of
+  --     Lit num -> pure . pure $ num
+  --     Ref id -> do
+  --       cell <- view $ _Sheet . at id
+  --       cell & maybe (throwError InvalidRef) (evalNext id)
+  --       val <- getVal id
+  --       undefined
+  --       -- maybe (throwError EmptyCell) pure val
+  -- in do
+  --   values <- get
+  --   let cached = values ^? _Sheet . ix id
+  --   let result = maybe val identity cached
+  --   _Sheet . at id <?= result
