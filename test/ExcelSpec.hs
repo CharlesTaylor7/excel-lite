@@ -43,7 +43,7 @@ spec = do
             value = readCell id sheet
           value `shouldBe` Left CyclicReference
 
-        test "reports cyclic ref when refs refer to each other " $ do
+        test "reports cyclic ref when refs refer to each other " $
           let
             id1 = CellId 0
             id2 = CellId 0
@@ -53,5 +53,22 @@ spec = do
             expectedSheet = emptySheet
               & _Sheet . at id1 ?~ Left CyclicReference
               & _Sheet . at id2 ?~ Left CyclicReference
+          in
+            evalSheet sheet `shouldBe` expectedSheet
 
-          evalSheet sheet `shouldBe` expectedSheet
+      describe "addition" $ do
+        test "works" $
+          let
+            id1 = CellId 0
+            id2 = CellId 1
+            id3 = CellId 2
+            sheet = emptySheet
+              & setCell id1 (Lit 3)
+              & setCell id2 (Lit 5)
+              & setCell id3 (Add (Ref id1) (Ref id2))
+            expectedSheet = emptySheet
+              & _Sheet . at id1 ?~ pure 3
+              & _Sheet . at id2 ?~ pure 5
+              & _Sheet . at id3 ?~ pure 8
+          in
+            evalSheet sheet `shouldBe` expectedSheet
