@@ -24,41 +24,37 @@ evalSheet :: SheetCells -> SheetValues
 evalSheet sheet =
   flip execState emptySheet $
   flip runReaderT sheet $
-  for_ (sheet ^. _Sheet . to Map.toList) $ uncurry evalNext
+  traverse_ (uncurry evalNext) $
+    sheet ^.. _Sheet . folding Map.toList . to (_1 %~ Just)
 
 evalNext :: (MonadReader SheetCells m, MonadState SheetValues m)
-         => CellId
+         => Maybe CellId
          -> Expr
          -> m CellValue
-evalNext id expr = do
-  val <- use $ _Sheet . at id
+evalNext maybeId expr = do
+  val <- case maybeId of
+    Just id -> use $ _Sheet . at id
+    Nothing -> pure Nothing
   case val of
     Just x -> pure x
     Nothing -> do
-      _Sheet . at id ?= Left CyclicReference
+      case maybeId of
+        Just id ->  _Sheet . at id ?= Left CyclicReference
+        Nothing -> pure ()
       val <- case expr of
         Lit num -> pure . pure $ num
-        Ref id -> do
-          cell_expr <- view $ _Sheet . at id
+        Ref refId -> do
+          cell_expr <- view $ _Sheet . at refId
           case cell_expr of
             Nothing -> pure $ Left InvalidRef
-            Just expr -> evalNext id expr
-      _Sheet . at id ?= val
-      pure val
-          -- let foo = maybe (Left InvalidRef) (_ . evalNext id) cell
-          -- pure foo
+            Just expr -> evalNext (Just refId) expr
+        Add expr1 expr2 -> do
+          val1 <- evalNext Nothing expr1
+          val2 <- evalNext Nothing expr2
+          pure $ liftA2 (+) val1 val2
 
-  --   val :: m CellValue
-  --   val = case expr of
-  --     Lit num -> pure . pure $ num
-  --     Ref id -> do
-  --       cell <- view $ _Sheet . at id
-  --       cell & maybe (throwError InvalidRef) (evalNext id)
-  --       val <- getVal id
-  --       undefined
-  --       -- maybe (throwError EmptyCell) pure val
-  -- in do
-  --   values <- get
-  --   let cached = values ^? _Sheet . ix id
-  --   let result = maybe val identity cached
-  --   _Sheet . at id <?= result
+      case maybeId of
+        Just id -> _Sheet . at id ?= val
+        Nothing -> pure ()
+
+      pure val
