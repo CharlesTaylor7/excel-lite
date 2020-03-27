@@ -12,7 +12,7 @@ class Pretty a where
 instance Pretty a => Pretty (Sheet a) where
   pretty = view $ _Sheet . folded . to pretty
 
-instance Pretty Expr where
+instance Pretty a => Pretty (Expr a) where
   pretty (Lit x) = pretty x
   pretty (Ref id) = pretty id
 

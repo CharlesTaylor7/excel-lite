@@ -5,13 +5,12 @@ import Internal.Imports
 import qualified RIO.Map as Map
 
 type Domain = Int
+type CellExpr = Expr Domain
 
-data Expr where
-  Lit :: Domain -> Expr
-  Ref :: CellId -> Expr
-  Add :: Expr -> Expr -> Expr
-  Multiply :: Expr -> Expr -> Expr
-  deriving (Show)
+data Expr a where
+  Lit :: a -> Expr a
+  Ref :: CellId -> Expr Domain
+  Apply :: Expr (a -> b) -> Expr a -> Expr b
 
 data EvalError
   = EmptyCell
@@ -24,7 +23,7 @@ newtype CellId = CellId Natural
 
 data Cell = Cell
   { _cell_id :: CellId
-  , _cell_expr :: Expr
+  , _cell_expr :: Expr Domain
   }
 
 newtype Sheet cell = Sheet (Map CellId cell)
@@ -32,11 +31,16 @@ newtype Sheet cell = Sheet (Map CellId cell)
 
 type CellValue = Either EvalError Domain
 
-type SheetCells = Sheet Expr
+type SheetCells = Sheet CellExpr
 type SheetValues = Sheet CellValue
 
-makeLenses ''Expr
+-- lenses
 makeLenses ''Cell
-makePrisms ''Sheet
-makePrisms ''EvalError
+
+-- isos
 makePrisms ''CellId
+makePrisms ''Sheet
+
+-- prisms
+makePrisms ''Expr
+makePrisms ''EvalError

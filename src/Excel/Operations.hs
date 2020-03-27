@@ -48,14 +48,10 @@ evalNext maybeId expr = do
           case cell_expr of
             Nothing -> pure $ Left InvalidRef
             Just expr -> evalNext (Just refId) expr
-        Add expr1 expr2 -> do
-          val1 <- evalNext Nothing expr1
-          val2 <- evalNext Nothing expr2
-          pure $ liftA2 (+) val1 val2
-        Multiply expr1 expr2 -> do
-          val1 <- evalNext Nothing expr1
-          val2 <- evalNext Nothing expr2
-          pure $ liftA2 (*) val1 val2
+        Apply expr1 expr2 -> do
+          f <- evalNext Nothing expr1
+          a <- evalNext Nothing expr2
+          pure $ liftA2 ($) f a
       case maybeId of
         Just id -> _Sheet . at id ?= val
         Nothing -> pure ()
