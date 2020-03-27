@@ -21,10 +21,10 @@ readCell id sheet =
     toEither a = maybe (Left a) Right
 
 evalSheet :: SheetCells -> SheetValues
-evalSheet sheet = undefined
-  -- flip execState emptySheet $
-  -- flip runReaderT sheet $
-  -- for_ (sheet ^. _Sheet . to Map.toList) $ uncurry evalNext
+evalSheet sheet =
+  flip execState emptySheet $
+  flip runReaderT sheet $
+  for_ (sheet ^. _Sheet . to Map.toList) $ uncurry evalNext
 
 evalNext :: (MonadReader SheetCells m, MonadState SheetValues m)
          => CellId
@@ -35,6 +35,7 @@ evalNext id expr = do
   case val of
     Just x -> pure x
     Nothing -> do
+      _Sheet . at id ?= Left CyclicReference
       val <- case expr of
         Lit num -> pure . pure $ num
         Ref id -> do

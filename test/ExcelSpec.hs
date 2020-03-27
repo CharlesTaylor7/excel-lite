@@ -43,9 +43,15 @@ spec = do
             value = readCell id sheet
           value `shouldBe` Left CyclicReference
 
-        test "reports cyclic ref when ref refers to itself " $ do
+        test "reports cyclic ref when refs refer to each other " $ do
           let
-            id = CellId 0
-            sheet = emptySheet & setCell id (Ref id)
-            value = readCell id sheet
-          value `shouldBe` Left CyclicReference
+            id1 = CellId 0
+            id2 = CellId 0
+            sheet = emptySheet
+              & setCell id1 (Ref id2)
+              & setCell id2 (Ref id1)
+            expectedSheet = emptySheet
+              & _Sheet . at id1 ?~ Left CyclicReference
+              & _Sheet . at id2 ?~ Left CyclicReference
+
+          evalSheet sheet `shouldBe` expectedSheet

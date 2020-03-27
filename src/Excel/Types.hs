@@ -28,7 +28,7 @@ data Cell = Cell
   }
 
 newtype Sheet cell = Sheet (Map CellId cell)
-  deriving (Show, Functor)
+  deriving (Show, Eq, Functor)
 
 type CellValue = Either EvalError Domain
 
