@@ -52,7 +52,10 @@ evalNext maybeId expr = do
           val1 <- evalNext Nothing expr1
           val2 <- evalNext Nothing expr2
           pure $ liftA2 (+) val1 val2
-
+        Multiply expr1 expr2 -> do
+          val1 <- evalNext Nothing expr1
+          val2 <- evalNext Nothing expr2
+          pure $ liftA2 (*) val1 val2
       case maybeId of
         Just id -> _Sheet . at id ?= val
         Nothing -> pure ()

@@ -56,19 +56,34 @@ spec = do
           in
             evalSheet sheet `shouldBe` expectedSheet
 
-      describe "addition" $ do
-        test "works" $
-          let
-            id1 = CellId 0
-            id2 = CellId 1
-            id3 = CellId 2
-            sheet = emptySheet
-              & setCell id1 (Lit 3)
-              & setCell id2 (Lit 5)
-              & setCell id3 (Add (Ref id1) (Ref id2))
-            expectedSheet = emptySheet
-              & _Sheet . at id1 ?~ pure 3
-              & _Sheet . at id2 ?~ pure 5
-              & _Sheet . at id3 ?~ pure 8
-          in
-            evalSheet sheet `shouldBe` expectedSheet
+      test "addition" $
+        let
+          id1 = CellId 0
+          id2 = CellId 1
+          id3 = CellId 2
+          sheet = emptySheet
+            & setCell id1 (Lit 3)
+            & setCell id2 (Lit 5)
+            & setCell id3 (Add (Ref id1) (Ref id2))
+          expectedSheet = emptySheet
+            & _Sheet . at id1 ?~ pure 3
+            & _Sheet . at id2 ?~ pure 5
+            & _Sheet . at id3 ?~ pure 8
+        in
+          evalSheet sheet `shouldBe` expectedSheet
+
+      test "multiplication" $
+        let
+          id1 = CellId 0
+          id2 = CellId 1
+          id3 = CellId 2
+          sheet = emptySheet
+            & setCell id1 (Lit 3)
+            & setCell id2 (Lit 5)
+            & setCell id3 (Multiply (Ref id1) (Ref id2))
+          expectedSheet = emptySheet
+            & _Sheet . at id1 ?~ pure 3
+            & _Sheet . at id2 ?~ pure 5
+            & _Sheet . at id3 ?~ pure 15
+        in
+          evalSheet sheet `shouldBe` expectedSheet
