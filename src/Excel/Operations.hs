@@ -24,7 +24,7 @@ evalSheet :: SheetCells -> SheetValues
 evalSheet sheet =
   flip execState emptySheet $
   flip runReaderT sheet $
-  traverse_ (uncurry evalNext) $
+  traverse_ (runExceptT . uncurry evalNext) $
     sheet ^.. _Sheet . folding Map.toList . to (_1 %~ Just)
 
 runMaybe :: Maybe a -> b -> (a -> b) -> b
@@ -33,10 +33,13 @@ runMaybe may b f = maybe b f may
 whenJust :: Applicative m => Maybe a -> (a -> m ()) -> m ()
 whenJust may f = maybe (pure ()) f may
 
-evalNext :: (MonadReader SheetCells m, MonadState SheetValues m)
+evalNext ::
+         ( MonadReader SheetCells m
+         , MonadState SheetValues m
+         )
          => Maybe CellId
          -> Expr
-         -> m CellValue
+         -> m Domain
 evalNext maybeId expr = do
   val <- runMaybe maybeId (pure Nothing) $
     \id -> use $ _Sheet . at id
@@ -50,21 +53,25 @@ evalNext maybeId expr = do
           _Sheet . at id ?= val
           pure val
 
-eval :: (MonadReader SheetCells m, MonadState SheetValues m)
+eval ::
+     ( MonadReader SheetCells m
+     , MonadState SheetValues m
+     , MonadError EvalError m
+     )
      => Expr
-     -> m (Either EvalError Domain)
+     -> m Domain
 eval = \case
-  Lit num -> pure . pure $ num
+  Lit num -> pure num
   Ref refId -> do
-    cell_expr <- view $ _Sheet . at refId
-    case cell_expr of
-      Nothing -> pure $ Left InvalidRef
-      Just expr -> evalNext (Just refId) expr
+    cellExpr <- view $ _Sheet . at refId
+    runMaybe cellExpr
+      (pure $ Left InvalidRef)
+      (evalNext (Just refId))
   Add expr1 expr2 -> do
-    val1 <- evalNext Nothing expr1
-    val2 <- evalNext Nothing expr2
+    val1 <- _evalNext Nothing expr1
+    val2 <- _evalNext Nothing expr2
     pure $ liftA2 (+) val1 val2
   Multiply expr1 expr2 -> do
-    val1 <- evalNext Nothing expr1
-    val2 <- evalNext Nothing expr2
+    val1 <- _evalNext Nothing expr1
+    val2 <- _evalNext Nothing expr2
     pure $ liftA2 (*) val1 val2
