@@ -24,7 +24,8 @@ evalSheet :: SheetCells -> SheetValues
 evalSheet sheet =
   flip execState emptySheet $
   flip runReaderT sheet $
-  traverse_ (runExceptT . uncurry evalNext) $
+  runExceptT $
+  traverse_  (uncurry evalNext) $
     sheet ^.. _Sheet . ifolded . withIndex . to (over _1 Just)
 
 runMaybe :: Maybe a -> b -> (a -> b) -> b
