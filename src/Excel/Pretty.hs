@@ -21,6 +21,19 @@ instance Pretty a => Pretty (Sheet a) where
 instance Pretty Expr where
   pretty (Lit x) = pretty x
   pretty (Ref id) = pretty id
+  pretty (Add a b) =
+    parensP a <> "+" <> parensP b
+  pretty (Subtract a b) =
+    parensP a <> "-" <> parensP b
+  pretty (Multiply a b) =
+    parensP a <> "*" <> parensP b
+  pretty (Divide a b) =
+    parensP a <> "/" <> parensP b
+  pretty (Exponent a b) =
+    parensP a <> "^" <> parensP b
+
+parens a = "(" <> a <> ")"
+parensP = parens . pretty
 
 instance Pretty CellId where
   pretty = ('$':) . show . view _CellId
