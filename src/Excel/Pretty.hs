@@ -15,28 +15,14 @@ class Pretty a where
 instance Pretty ParseError where
   pretty = show
 
-newtype JoinItem = JoinItem String
-
-instance Semigroup JoinItem where
-  JoinItem "" <> x = x
-  x <> JoinItem "" = x
-  JoinItem x <> JoinItem y = JoinItem $ x <> " | " <> y
-
-instance Monoid JoinItem where
-  mempty = JoinItem ""
-
-instance Pretty JoinItem where
-  pretty (JoinItem "") = "<empty sheet>"
-  pretty (JoinItem x) = x
-
 instance Pretty a => Pretty (Sheet a) where
   pretty sheet =
     let
-      joinPretty = JoinItem . pretty
       cellIds = enumFromTo (CellId 0) $ sheet ^. sheet_maxId
-      joined = cellIds ^. folded . to joinPretty
+      getCell id = sheet ^? sheet_cells . ix id
+      cells = cellIds ^.. folded . to (pretty . getCell)
     in
-      pretty joined
+      intercalate " | " cells
 
 instance Pretty Expr where
   pretty (Lit x) = pretty x
