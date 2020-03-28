@@ -13,8 +13,11 @@ loop = do
   prettyPrint sheet
   prettyPrint cells
   write <- promptUser
-  -- ~
+  modifySheet write
   loop
+
+modifySheet :: MonadState SheetCells m => Write -> m ()
+modifySheet (Write id expr) = modify $ setCell id expr
 
 promptUser :: MonadIO m => m Write
 promptUser = do
