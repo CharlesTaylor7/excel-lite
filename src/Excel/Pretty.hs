@@ -17,7 +17,7 @@ instance Pretty ParseError where
 
 instance Pretty a => Pretty (Sheet a) where
   pretty sheet =
-    let text = sheet ^. _Sheet . folded . to pretty
+    let text = sheet ^. sheet_cells . folded . to pretty
     in if null text then "<empty sheet>" else text
 
 instance Pretty Expr where

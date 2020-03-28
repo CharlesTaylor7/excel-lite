@@ -5,15 +5,18 @@ import Excel.Types
 import qualified RIO.Map as Map
 
 emptySheet :: Sheet a
-emptySheet = Sheet Map.empty
+emptySheet = Sheet Map.empty $ CellId 0
 
 setCell :: CellId -> Expr -> SheetCells -> SheetCells
-setCell id expr = _Sheet . at id ?~ expr
+setCell id expr = updateCell . updateMaxId
+  where
+    updateCell = sheet_cells . at id ?~ expr
+    updateMaxId = sheet_maxId %~ max id
 
 readCell :: CellId -> SheetCells -> CellValue
 readCell id sheet =
   let
-    val = evalSheet sheet ^? _Sheet . ix id
+    val = evalSheet sheet ^? sheet_cells . ix id
   in
     join . toEither EmptyCell $ val
   where
@@ -22,10 +25,10 @@ readCell id sheet =
 
 evalSheet :: SheetCells -> SheetValues
 evalSheet sheet =
-  flip execState emptySheet $
+  flip execState (sheet & sheet_cells .~ Map.empty) $
   flip runReaderT sheet $
   runExceptT $
-  iforOf_ (_Sheet . ifolded) sheet $ evalNext . Just
+  iforOf_ (sheet_cells . ifolded) sheet $ evalNext . Just
 
 runMaybe :: Maybe a -> b -> (a -> b) -> b
 runMaybe may b f = maybe b f may
@@ -39,15 +42,15 @@ evalNext ::
          -> m CellValue
 evalNext maybeId expr = do
   val <- runMaybe maybeId (pure Nothing) $
-    \id -> use $ _Sheet . at id
+    \id -> use $ sheet_cells . at id
   case val of
     Just x -> pure x
     Nothing -> do
       runMaybe maybeId (eval expr) $
         \id -> do
-          _Sheet . at id ?= Left CyclicReference
+          sheet_cells . at id ?= Left CyclicReference
           val <- eval expr
-          _Sheet . at id ?= val
+          sheet_cells . at id ?= val
           pure val
 
 eval ::
@@ -59,7 +62,7 @@ eval ::
 eval = \case
   Lit num -> pure . pure $ num
   Ref refId -> do
-    cellExpr <- view $ _Sheet . at refId
+    cellExpr <- view $ sheet_cells . at refId
     runMaybe cellExpr
       (pure $ Left InvalidRef)
       (evalNext (Just refId))

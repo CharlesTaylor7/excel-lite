@@ -38,7 +38,10 @@ data Write = Write
   }
   deriving (Show, Eq)
 
-newtype Sheet cell = Sheet (Map CellId cell)
+data Sheet cell = Sheet
+  { _sheet_cells :: Map CellId cell
+  , _sheet_maxId :: CellId
+  }
   deriving (Show, Eq, Functor)
 
 type CellValue = Either EvalError Domain
@@ -48,7 +51,8 @@ type SheetValues = Sheet CellValue
 
 makeLenses ''Expr
 makeLenses ''Cell
+makeLenses ''Sheet
 makeLenses ''Write
-makePrisms ''Sheet
+
 makePrisms ''EvalError
 makePrisms ''CellId
