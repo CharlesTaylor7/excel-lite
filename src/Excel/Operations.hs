@@ -25,7 +25,7 @@ evalSheet sheet =
   flip execState emptySheet $
   flip runReaderT sheet $
   traverse_ (runExceptT . uncurry evalNext) $
-    sheet ^.. _Sheet . ifolded . withIndex . to (_1 %~ Just)
+    sheet ^.. _Sheet . ifolded . withIndex . to (over _1 Just)
 
 runMaybe :: Maybe a -> b -> (a -> b) -> b
 runMaybe may b f = maybe b f may
