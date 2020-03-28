@@ -25,13 +25,10 @@ evalSheet sheet =
   flip execState emptySheet $
   flip runReaderT sheet $
   traverse_ (runExceptT . uncurry evalNext) $
-    sheet ^.. _Sheet . folding Map.toList . to (_1 %~ Just)
+    sheet ^.. _Sheet . ifolded . withIndex . to (_1 %~ Just)
 
 runMaybe :: Maybe a -> b -> (a -> b) -> b
 runMaybe may b f = maybe b f may
-
-whenJust :: Applicative m => Maybe a -> (a -> m ()) -> m ()
-whenJust may f = maybe (pure ()) f may
 
 evalNext ::
          ( MonadReader SheetCells m
