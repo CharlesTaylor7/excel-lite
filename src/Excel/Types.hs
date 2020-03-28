@@ -10,13 +10,16 @@ data Expr where
   Lit :: Domain -> Expr
   Ref :: CellId -> Expr
   Add :: Expr -> Expr -> Expr
+  Subtract :: Expr -> Expr -> Expr
   Multiply :: Expr -> Expr -> Expr
+  Divide :: Expr -> Expr -> Expr
   deriving (Show, Eq)
 
 data EvalError
   = EmptyCell
   | InvalidRef
   | CyclicReference
+  | DivideByZero
   deriving (Show, Eq)
 
 newtype CellId = CellId Natural
