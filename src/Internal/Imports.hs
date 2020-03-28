@@ -11,7 +11,6 @@ module Internal.Imports
   , module RIO
   , module Control.Monad.State.Strict
   , module Control.Monad.Except
-  , module Control.Monad.Trans.Maybe
   , identity
   ) where
 
@@ -34,9 +33,6 @@ import Control.Lens
 -- mtl
 import Control.Monad.State.Strict
 import Control.Monad.Except
-
--- transformers
-import Control.Monad.Trans.Maybe
 
 
 identity :: a -> a
