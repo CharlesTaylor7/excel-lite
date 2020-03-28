@@ -13,6 +13,7 @@ data Expr where
   Subtract :: Expr -> Expr -> Expr
   Multiply :: Expr -> Expr -> Expr
   Divide :: Expr -> Expr -> Expr
+  Exponent :: Expr -> Expr -> Expr
   deriving (Show, Eq)
 
 data EvalError
@@ -20,6 +21,7 @@ data EvalError
   | InvalidRef
   | CyclicReference
   | DivideByZero
+  | NegativeExponent
   deriving (Show, Eq)
 
 newtype CellId = CellId Natural

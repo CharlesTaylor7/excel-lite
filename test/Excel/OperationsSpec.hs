@@ -119,3 +119,35 @@ spec = do
               & _Sheet . at id3 ?~ throwError DivideByZero
           in
             evalSheet sheet `shouldBe` expectedSheet
+
+      describe "exponentiation" $ do
+        test "evaluation" $
+          let
+            id1 = CellId 0
+            id2 = CellId 1
+            id3 = CellId 2
+            sheet = emptySheet
+              & setCell id1 (Lit 2)
+              & setCell id2 (Lit 5)
+              & setCell id3 (Exponent (Ref id1) (Ref id2))
+            expectedSheet = emptySheet
+              & _Sheet . at id1 ?~ pure 2
+              & _Sheet . at id2 ?~ pure 5
+              & _Sheet . at id3 ?~ pure 32
+          in
+            evalSheet sheet `shouldBe` expectedSheet
+        -- test "negative exponent error" $
+        --   let
+        --     id1 = CellId 0
+        --     id2 = CellId 1
+        --     id3 = CellId 2
+        --     sheet = emptySheet
+        --       & setCell id1 (Lit 3)
+        --       & setCell id2 (Lit (-1))
+        --       & setCell id3 (Exponent (Ref id1) (Ref id2))
+        --     expectedSheet = emptySheet
+        --       & _Sheet . at id1 ?~ pure 3
+        --       & _Sheet . at id2 ?~ pure (-1)
+        --       & _Sheet . at id3 ?~ throwError NegativeExponent
+        --   in
+        --     evalSheet sheet `shouldBe` _expectedSheet
