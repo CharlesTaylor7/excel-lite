@@ -3,11 +3,17 @@ module Excel.Pretty where
 import Internal.Imports
 import Excel.Types
 
-prettyPrint :: Pretty a => a -> IO ()
-prettyPrint = putStrLn . pretty
+import Text.Parsec (ParseError(..))
+
+
+prettyPrint :: MonadIO m => Pretty a => a -> m ()
+prettyPrint = liftIO . putStrLn . pretty
 
 class Pretty a where
   pretty :: a -> String
+
+instance Pretty ParseError where
+  pretty = show
 
 instance Pretty a => Pretty (Sheet a) where
   pretty = view $ _Sheet . folded . to pretty
