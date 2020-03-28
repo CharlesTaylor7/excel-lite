@@ -11,7 +11,7 @@ data Expr where
   Ref :: CellId -> Expr
   Add :: Expr -> Expr -> Expr
   Multiply :: Expr -> Expr -> Expr
-  deriving (Show)
+  deriving (Show, Eq)
 
 data EvalError
   = EmptyCell
@@ -27,6 +27,12 @@ data Cell = Cell
   , _cell_expr :: Expr
   }
 
+data Write = Write
+  { _write_cell :: CellId
+  , _write_expr :: Expr
+  }
+  deriving (Show, Eq)
+
 newtype Sheet cell = Sheet (Map CellId cell)
   deriving (Show, Eq, Functor)
 
@@ -37,6 +43,7 @@ type SheetValues = Sheet CellValue
 
 makeLenses ''Expr
 makeLenses ''Cell
+makeLenses ''Write
 makePrisms ''Sheet
 makePrisms ''EvalError
 makePrisms ''CellId

@@ -1,4 +1,4 @@
-module ExcelSpec where
+module Excel.OperationsSpec where
 
 import Excel
 import Test.QuickCheck
@@ -7,7 +7,7 @@ import Test.Hspec
 test = it
 
 spec = do
-  describe "Excel" $ do
+  describe "Operations" $ do
     describe "readCell" $ do
       test "reports EmptyCell when cell is not initialized" $ do
         readCell (CellId 0) emptySheet `shouldBe` Left EmptyCell

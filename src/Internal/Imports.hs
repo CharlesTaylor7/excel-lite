@@ -34,6 +34,5 @@ import Control.Lens
 import Control.Monad.State.Strict
 import Control.Monad.Except
 
-
 identity :: a -> a
 identity x = x
