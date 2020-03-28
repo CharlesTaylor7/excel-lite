@@ -9,6 +9,26 @@ test = it
 spec = do
   describe "Operations" $ do
     describe "readCell" $ do
+      it "updates the max id" $
+        let
+          id = CellId 4
+          sheet = emptySheet
+            & setCell id (Lit 5)
+        in
+          sheet `shouldBe` Sheet [(CellId 4, Lit 5)] id
+      it "updates the max id after multiple sets" $
+        let
+          id1 = CellId 0
+          id2 = CellId 1
+          id3 = CellId 2
+          sheet = emptySheet
+            & setCell id1 (Lit 2)
+            & setCell id2 (Lit 5)
+            & setCell id3 (Exponent (Ref id1) (Ref id2))
+        in
+          sheet ^. sheet_maxId `shouldBe` CellId 2
+
+    describe "readCell" $ do
       test "reports EmptyCell when cell is not initialized" $ do
         readCell (CellId 0) emptySheet `shouldBe` Left EmptyCell
 
@@ -46,13 +66,14 @@ spec = do
         test "reports cyclic ref when refs refer to each other " $
           let
             id1 = CellId 0
-            id2 = CellId 0
+            id2 = CellId 7
             sheet = emptySheet
               & setCell id1 (Ref id2)
               & setCell id2 (Ref id1)
             expectedSheet = emptySheet
-              & _Sheet . at id1 ?~ Left CyclicReference
-              & _Sheet . at id2 ?~ Left CyclicReference
+              & sheet_cells . at id1 ?~ Left CyclicReference
+              & sheet_cells . at id2 ?~ Left CyclicReference
+              & sheet_maxId .~ id2
           in
             evalSheet sheet `shouldBe` expectedSheet
 
@@ -66,9 +87,10 @@ spec = do
             & setCell id2 (Lit 5)
             & setCell id3 (Add (Ref id1) (Ref id2))
           expectedSheet = emptySheet
-            & _Sheet . at id1 ?~ pure 3
-            & _Sheet . at id2 ?~ pure 5
-            & _Sheet . at id3 ?~ pure 8
+            & sheet_cells . at id1 ?~ pure 3
+            & sheet_cells . at id2 ?~ pure 5
+            & sheet_cells . at id3 ?~ pure 8
+            & sheet_maxId .~ id3
         in
           evalSheet sheet `shouldBe` expectedSheet
 
@@ -82,9 +104,10 @@ spec = do
             & setCell id2 (Lit 5)
             & setCell id3 (Multiply (Ref id1) (Ref id2))
           expectedSheet = emptySheet
-            & _Sheet . at id1 ?~ pure 3
-            & _Sheet . at id2 ?~ pure 5
-            & _Sheet . at id3 ?~ pure 15
+            & sheet_cells . at id1 ?~ pure 3
+            & sheet_cells . at id2 ?~ pure 5
+            & sheet_cells . at id3 ?~ pure 15
+            & sheet_maxId .~ id3
         in
           evalSheet sheet `shouldBe` expectedSheet
 
@@ -99,9 +122,10 @@ spec = do
               & setCell id2 (Lit 5)
               & setCell id3 (Divide (Ref id1) (Ref id2))
             expectedSheet = emptySheet
-              & _Sheet . at id1 ?~ pure 44
-              & _Sheet . at id2 ?~ pure 5
-              & _Sheet . at id3 ?~ pure 8
+              & sheet_cells . at id1 ?~ pure 44
+              & sheet_cells . at id2 ?~ pure 5
+              & sheet_cells . at id3 ?~ pure 8
+              & sheet_maxId .~ id3
           in
             evalSheet sheet `shouldBe` expectedSheet
         test "divide by zero error" $
@@ -114,9 +138,10 @@ spec = do
               & setCell id2 (Lit 0)
               & setCell id3 (Divide (Ref id1) (Ref id2))
             expectedSheet = emptySheet
-              & _Sheet . at id1 ?~ pure 3
-              & _Sheet . at id2 ?~ pure 0
-              & _Sheet . at id3 ?~ throwError DivideByZero
+              & sheet_cells . at id1 ?~ pure 3
+              & sheet_cells . at id2 ?~ pure 0
+              & sheet_cells . at id3 ?~ throwError DivideByZero
+              & sheet_maxId .~ id3
           in
             evalSheet sheet `shouldBe` expectedSheet
 
@@ -131,10 +156,11 @@ spec = do
               & setCell id2 (Lit 5)
               & setCell id3 (Exponent (Ref id1) (Ref id2))
             expectedSheet = emptySheet
-              & _Sheet . at id1 ?~ pure 2
-              & _Sheet . at id2 ?~ pure 5
-              & _Sheet . at id3 ?~ pure 32
-          in
+              & sheet_cells . at id1 ?~ pure 2
+              & sheet_cells . at id2 ?~ pure 5
+              & sheet_cells . at id3 ?~ pure 32
+              & sheet_maxId .~ id3
+          in do
             evalSheet sheet `shouldBe` expectedSheet
         test "negative exponent error" $
           let
@@ -146,8 +172,9 @@ spec = do
               & setCell id2 (Lit (-5))
               & setCell id3 (Exponent (Ref id1) (Ref id2))
             expectedSheet = emptySheet
-              & _Sheet . at id1 ?~ pure 2
-              & _Sheet . at id2 ?~ pure (-5)
-              & _Sheet . at id3 ?~ throwError NegativeExponent
+              & sheet_cells . at id1 ?~ pure 2
+              & sheet_cells . at id2 ?~ pure (-5)
+              & sheet_cells . at id3 ?~ throwError NegativeExponent
+              & sheet_maxId .~ id3
           in
             evalSheet sheet `shouldBe` expectedSheet
