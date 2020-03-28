@@ -1,5 +1,7 @@
 module Excel.Parser
-
+  ( parseExpr
+  , parseInput
+  )
   where
 
 import Internal.Imports
@@ -36,7 +38,9 @@ literal :: Parser Expr
 literal = Lit . fromIntegral <$> integer
 
 table =
-  [ [ binary "*" Multiply AssocLeft
+  [ [ binary "^" Exponent AssocLeft
+    ]
+  , [ binary "*" Multiply AssocLeft
     , binary "/" Divide AssocLeft
     ]
   , [ binary "+" Add AssocLeft
@@ -51,7 +55,7 @@ excelLiteDef :: LanguageDef a
 excelLiteDef = emptyDef
   { Token.identStart      = pure '$'
   , Token.identLetter     = digit
-  , Token.reservedOpNames = ["+", "*", "="]
+  , Token.reservedOpNames = ["+", "-", "*", "/", "^", "="]
   }
 
 lexer = Token.makeTokenParser excelLiteDef
