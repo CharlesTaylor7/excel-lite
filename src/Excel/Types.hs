@@ -25,7 +25,7 @@ data EvalError
   deriving (Show, Eq)
 
 newtype CellId = CellId Natural
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Enum)
 
 data Cell = Cell
   { _cell_id :: CellId
