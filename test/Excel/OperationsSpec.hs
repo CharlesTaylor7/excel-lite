@@ -87,3 +87,35 @@ spec = do
             & _Sheet . at id3 ?~ pure 15
         in
           evalSheet sheet `shouldBe` expectedSheet
+
+      describe "division" $ do
+        test "evaluation" $
+          let
+            id1 = CellId 0
+            id2 = CellId 1
+            id3 = CellId 2
+            sheet = emptySheet
+              & setCell id1 (Lit 44)
+              & setCell id2 (Lit 5)
+              & setCell id3 (Divide (Ref id1) (Ref id2))
+            expectedSheet = emptySheet
+              & _Sheet . at id1 ?~ pure 44
+              & _Sheet . at id2 ?~ pure 5
+              & _Sheet . at id3 ?~ pure 8
+          in
+            evalSheet sheet `shouldBe` expectedSheet
+        test "divide by zero error" $
+          let
+            id1 = CellId 0
+            id2 = CellId 1
+            id3 = CellId 2
+            sheet = emptySheet
+              & setCell id1 (Lit 3)
+              & setCell id2 (Lit 0)
+              & setCell id3 (Divide (Ref id1) (Ref id2))
+            expectedSheet = emptySheet
+              & _Sheet . at id1 ?~ pure 3
+              & _Sheet . at id2 ?~ pure 0
+              & _Sheet . at id3 ?~ throwError DivideByZero
+          in
+            evalSheet sheet `shouldBe` expectedSheet

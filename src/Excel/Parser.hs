@@ -36,17 +36,16 @@ literal :: Parser Expr
 literal = Lit . fromIntegral <$> integer
 
 table =
-  [ [binary "*" Multiply AssocLeft
-    -- , binary "/" (div) AssocLeft
+  [ [ binary "*" Multiply AssocLeft
+    , binary "/" Divide AssocLeft
     ]
-  , [binary "+" Add AssocLeft
-    -- , binary "-" (-)   AssocLeft
+  , [ binary "+" Add AssocLeft
+    , binary "-" Subtract AssocLeft
     ]
   ]
 
--- parseOp
 parseOp name fun = reservedOp name *> pure fun
-binary  name fun assoc = Infix (parseOp name fun) assoc
+binary name fun assoc = Infix (parseOp name fun) assoc
 
 excelLiteDef :: LanguageDef a
 excelLiteDef = emptyDef

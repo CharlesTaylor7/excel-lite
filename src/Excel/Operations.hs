@@ -64,11 +64,33 @@ eval = \case
       (pure $ Left InvalidRef)
       (evalNext (Just refId))
   Add expr1 expr2 -> runOp (+) expr1 expr2
+  Subtract expr1 expr2 -> runOp (-) expr1 expr2
   Multiply expr1 expr2 -> runOp (*) expr1 expr2
+  Divide expr1 expr2 -> runOpGuards div (expr1, noGuard) (expr2, divideByZeroGuard)
   where
     runOp op expr1 expr2 =
-      let
-        proc = ExceptT . evalNext Nothing
-      in
-        runExceptT $
-          liftA2 op (proc expr1) (proc expr2)
+      runExceptT $ liftA2 op (proc expr1) (proc expr2)
+
+    proc = ExceptT . evalNext Nothing
+
+    runOpGuards op pair1 pair2 =
+      runExceptT $ liftA2 op (proc' pair1) (proc' pair2)
+
+    proc' (exp, guard) = apply guard . proc $ exp
+
+data Guard f a = Guard
+  { _guard_cond :: a -> Bool
+  , _guard_act :: a -> f ()
+  }
+
+divideByZeroGuard :: MonadError EvalError m => Guard m Domain
+divideByZeroGuard = Guard (== 0) (const $ throwError DivideByZero)
+
+noGuard :: Applicative m => Guard m a
+noGuard = Guard (const False) (const $ pure ())
+
+apply :: Monad m => Guard m a -> m a -> m a
+apply (Guard cond act) m_a = do
+  a <- m_a
+  when (cond a) $ act a
+  pure a

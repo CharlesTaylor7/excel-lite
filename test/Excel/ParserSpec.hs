@@ -20,3 +20,10 @@ spec = do
           expected = pure $ Write (CellId 1) (Add (Multiply (cell 2) (cell 3)) (Lit 43))
         in
           parsed `shouldBe` expected
+      it "handles subtraction & division" $
+        let
+          parsed = parseInput "$1 = ($2 - $3) / 43"
+          cell = Ref . CellId
+          expected = pure $ Write (CellId 1) (Divide (Subtract (cell 2) (cell 3)) (Lit 43))
+        in
+          parsed `shouldBe` expected
