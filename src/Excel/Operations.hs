@@ -67,6 +67,7 @@ eval = \case
   Subtract expr1 expr2 -> runOp (-) expr1 expr2
   Multiply expr1 expr2 -> runOp (*) expr1 expr2
   Divide expr1 expr2 -> runOpGuards div (expr1, noGuard) (expr2, divideByZeroGuard)
+  Exponent expr1 expr2 -> runOpGuards (^) (expr1, noGuard) (expr2, negativeExponentGuard)
   where
     runOp op expr1 expr2 =
       runExceptT $ liftA2 op (proc expr1) (proc expr2)
@@ -85,6 +86,9 @@ data Guard f a = Guard
 
 divideByZeroGuard :: MonadError EvalError m => Guard m Domain
 divideByZeroGuard = Guard (== 0) (const $ throwError DivideByZero)
+
+negativeExponentGuard :: MonadError EvalError m => Guard m Domain
+negativeExponentGuard = Guard (< 0) (const $ throwError NegativeExponent)
 
 noGuard :: Applicative m => Guard m a
 noGuard = Guard (const False) (const $ pure ())

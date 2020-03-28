@@ -27,3 +27,11 @@ spec = do
           expected = pure $ Write (CellId 1) (Divide (Subtract (cell 2) (cell 3)) (Lit 43))
         in
           parsed `shouldBe` expected
+
+      it "handles exponents" $
+        let
+          parsed = parseInput "$1 = 2^0"
+          cell = Ref . CellId
+          expected = pure $ Write (CellId 1) (Exponent (Lit 2) (Lit 0))
+        in
+          parsed `shouldBe` expected
