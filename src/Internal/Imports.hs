@@ -15,7 +15,7 @@ module Internal.Imports
   , print
   ) where
 
-import Prelude (putStrLn, maximum, enumFromTo, getLine, read, repeat, zipWith)
+import Prelude (putStr, putStrLn, maximum, enumFromTo, getLine, read, repeat, zipWith)
 import Data.Monoid
 import Data.Ord
 import Data.Bifunctor

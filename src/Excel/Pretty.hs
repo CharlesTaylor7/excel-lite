@@ -20,9 +20,14 @@ instance Pretty a => Pretty (Sheet a) where
     let
       cellIds = enumFromTo (CellId 0) $ sheet ^. sheet_maxId
       getCell id = sheet ^? sheet_cells . ix id
-      cells = cellIds ^.. folded . to (pretty . getCell)
+      anyCells = has (sheet_cells . folded) sheet
     in
-      intercalate " | " cells
+      if anyCells
+      then
+        cellIds
+        & map (pretty . getCell)
+        & intercalate " | "
+      else "<empty sheet>"
 
 instance Pretty Expr where
   pretty (Lit x) = pretty x
@@ -58,7 +63,7 @@ instance (Pretty a, Pretty b) => Pretty (Either a b) where
   pretty = pretty ||| pretty
 
 instance Pretty a => Pretty (Maybe a) where
-  pretty = maybe "Nothing" pretty
+  pretty = maybe " " pretty
 
 instance Pretty a => Pretty [a] where
   pretty as = "(" <> join as <> ")"

@@ -22,7 +22,7 @@ modifySheet (Write id expr) = modify $ setCell id expr
 
 promptUser :: MonadIO m => m Write
 promptUser = do
-  liftIO $ putStrLn "Input assignment w/ syntax like '$x = 2 + $y', etc. "
+  liftIO $ putStrLn ">"
   line <- liftIO getLine
   case parseInput line of
     Left err -> prettyPrint err >> promptUser
