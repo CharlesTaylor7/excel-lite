@@ -1,7 +1,6 @@
 module Excel.Parser
-  ( runParser
-  , parseInput
-  ) where
+
+   where
 
 import Internal.Imports hiding (try)
 import Excel.Types
@@ -12,13 +11,20 @@ import Text.ParserCombinators.Parsec.Language
 import qualified Text.ParserCombinators.Parsec as Parsec
 import qualified Text.ParserCombinators.Parsec.Token as Token
 
+parseInput :: String -> Either ParseError Input
 parseInput = runParser input
 
 runParser :: Parser a -> String -> Either ParseError a
 runParser parser = Parsec.runParser parser () ""
 
+command :: Parser Command
+command = pure ":q" >> pure Quit
+
 input :: Parser Input
-input = Assign <$> try assignment <|> fmap Expr expr
+input =
+  Exec <$> try command
+  <|> Assign <$> try assignment
+  <|> Eval <$> expr
 
 assignment :: Parser Assignment
 assignment = do
@@ -32,6 +38,8 @@ expr = buildExpressionParser table term <?> "expression"
 
 term :: Parser Expr
 term = parens expr <|> fmap Ref cellId <|> literal <?> "simple expression"
+  where
+    parens = Token.parens lexer
 
 cellId :: Parser CellId
 cellId = CellId . fromIntegral <$> (char '$' *> integer)
@@ -39,9 +47,11 @@ cellId = CellId . fromIntegral <$> (char '$' *> integer)
 literal :: Parser Expr
 literal = Lit . fromIntegral <$> integer
 
+table :: OperatorTable Char () Expr
 table =
   [ [ binary "^" Exponent AssocLeft
     ]
+
   , [ binary "*" Multiply AssocLeft
     , binary "/" Divide AssocLeft
     ]
@@ -61,9 +71,5 @@ excelLiteDef = emptyDef
   }
 
 lexer = Token.makeTokenParser excelLiteDef
-identifier = Token.identifier lexer
-reserved   = Token.reserved   lexer
 reservedOp = Token.reservedOp lexer
-parens     = Token.parens     lexer
 integer    = Token.integer    lexer
-whiteSpace = Token.whiteSpace lexer

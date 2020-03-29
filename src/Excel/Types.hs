@@ -44,8 +44,13 @@ data Sheet cell = Sheet
   deriving (Show, Eq, Functor)
 
 data Input
-  = Expr Expr
+  = Eval Expr
   | Assign Assignment
+  | Exec Command
+  deriving (Show, Eq)
+
+data Command
+  = Quit
   deriving (Show, Eq)
 
 type CellValue = Either EvalError Domain
@@ -65,3 +70,4 @@ makeLenses ''Assignment
 makePrisms ''Expr
 makePrisms ''EvalError
 makePrisms ''Input
+makePrisms ''Command

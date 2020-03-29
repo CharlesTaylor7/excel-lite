@@ -11,19 +11,27 @@ loop = do
   sheet <- get
   prettyPrint sheet
   input <- promptUser
-  runInput input
-  loop
+  is_end <- runInput input
+  case is_end of
+    Nothing -> loop
+    Just quit -> print quit
 
+data End = UserQuit
+  deriving Show
+  
 runInput :: (MonadState SheetCells m, MonadIO m)
          => Input
-         -> m ()
+         -> m (Maybe End)
 runInput = \case
-    Expr expr -> do
+    Eval expr -> do
       sheet <- get
       let val = evalExpr expr $ sheet
       prettyPrint val
-    Assign assignment ->
+      pure Nothing
+    Assign assignment -> do
       modifySheet assignment
+      pure Nothing
+    Exec Quit -> pure . Just $ UserQuit
 
 evalExpr :: Expr -> SheetCells -> CellValue
 evalExpr expr sheet =
