@@ -9,6 +9,7 @@ module Internal.Imports
   , module Data.Ord
   , module Numeric.Natural
   , module RIO
+  , module RIO.List
   , module Control.Monad.State.Strict
   , module Control.Monad.Except
   , identity
@@ -27,6 +28,7 @@ import Numeric.Natural
 
 -- rio
 import RIO hiding (Lens, Lens', Getting, ASetter, ASetter', lens, (^.), to, view, over, set, sets, first, second, id)
+import RIO.List (unzip)
 
 -- lens
 import Control.Lens

@@ -9,10 +9,8 @@ loop :: (MonadState SheetCells m, MonadIO m)
      => m ()
 loop = do
   sheet <- get
-  let cells = evalSheet sheet
   liftIO $ putStrLn "sheet: "
   prettyPrint sheet
-  prettyPrint cells
   write <- promptUser
   modifySheet write
   loop

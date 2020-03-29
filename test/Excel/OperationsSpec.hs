@@ -6,9 +6,12 @@ import Test.Hspec
 
 test = it
 
+shouldBeJust :: (Show a, Eq a) => Maybe a -> a -> Expectation
+a `shouldBeJust` b = a `shouldBe` Just b
+
 spec = do
   describe "Operations" $ do
-    describe "readCell" $ do
+    describe "setCell" $ do
       it "updates the max id" $
         let
           id = CellId 4
@@ -29,8 +32,8 @@ spec = do
           sheet ^. sheet_maxId `shouldBe` CellId 2
 
     describe "readCell" $ do
-      test "reports EmptyCell when cell is not initialized" $ do
-        readCell (CellId 0) emptySheet `shouldBe` Left EmptyCell
+      test "reports Nothing when cell is not initialized" $ do
+        readCell (CellId 0) emptySheet `shouldBe` Nothing
 
       describe "literals" $ do
         test "gets the literal value set" $ do
@@ -38,7 +41,7 @@ spec = do
             id = CellId 0
             sheet = emptySheet & setCell id (Lit 2)
             value = readCell id sheet
-          value `shouldBe` pure 2
+          value `shouldBeJust` pure 2
       describe "refs" $ do
         test "reads ref when set" $ do
           let
@@ -47,21 +50,21 @@ spec = do
             sheet = emptySheet
               & setCell id1 (Ref . CellId $ 2)
               & setCell id2 (Lit 5)
-          readCell id1 sheet `shouldBe` pure 5
+          readCell id1 sheet `shouldBeJust` pure 5
 
         test "reports no ref when ref doesn't exist " $ do
           let
             id = CellId 0
             sheet = emptySheet & setCell id (Ref . CellId $ 2)
             value = readCell id sheet
-          value `shouldBe` Left InvalidRef
+          value `shouldBeJust` Left InvalidRef
 
         test "reports cyclic ref when ref refers to itself " $ do
           let
             id = CellId 0
             sheet = emptySheet & setCell id (Ref id)
             value = readCell id sheet
-          value `shouldBe` Left CyclicReference
+          value `shouldBeJust` Left CyclicReference
 
         test "reports cyclic ref when refs refer to each other " $
           let

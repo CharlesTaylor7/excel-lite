@@ -17,8 +17,7 @@ data Expr where
   deriving (Show, Eq)
 
 data EvalError
-  = EmptyCell
-  | InvalidRef
+  = InvalidRef
   | CyclicReference
   | DivideByZero
   | NegativeExponent

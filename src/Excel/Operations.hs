@@ -13,15 +13,8 @@ setCell id expr = updateCell . updateMaxId
     updateCell = sheet_cells . at id ?~ expr
     updateMaxId = sheet_maxId %~ max id
 
-readCell :: CellId -> SheetCells -> CellValue
-readCell id sheet =
-  let
-    val = evalSheet sheet ^? sheet_cells . ix id
-  in
-    join . toEither EmptyCell $ val
-  where
-    toEither :: a -> Maybe b -> Either a b
-    toEither a = maybe (Left a) Right
+readCell :: CellId -> SheetCells -> Maybe CellValue
+readCell id sheet = evalSheet sheet ^? sheet_cells . ix id
 
 evalSheet :: SheetCells -> SheetValues
 evalSheet sheet =
