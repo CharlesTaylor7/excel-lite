@@ -11,19 +11,30 @@ import Text.ParserCombinators.Parsec.Language
 import qualified Text.ParserCombinators.Parsec as Parsec
 import qualified Text.ParserCombinators.Parsec.Token as Token
 
-parseInput :: String -> Either ParseError Input
+parseInput :: String -> Either ParseError Command
 parseInput = runParser input
 
 runParser :: Parser a -> String -> Either ParseError a
 runParser parser = Parsec.runParser parser () ""
 
 command :: Parser Command
-command = pure ":q" >> pure Quit
+command = do
+  char ':'
+  let
+    quit = char 'q' $> Quit
+    delete = do
+      char 'd'
+      Token.whiteSpace lexer
+      Delete <$> cellId
+    edit = do
+      char 'e'
+      Token.whiteSpace lexer
+      Edit <$> cellId
+  quit <|> delete <|> edit
 
-input :: Parser Input
+input :: Parser Command
 input =
-  Exec <$> try command
-  <|> Assign <$> try assignment
+  command
   <|> Eval <$> expr
 
 assignment :: Parser Assignment

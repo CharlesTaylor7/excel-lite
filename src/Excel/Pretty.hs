@@ -9,7 +9,7 @@ import Text.Parsec (ParseError(..))
 
 
 prettyPrint :: MonadIO m => Pretty a => a -> m ()
-prettyPrint = liftIO . putStrLn . pretty
+prettyPrint = putStrLn . pretty
 
 class Pretty a where
   pretty :: a -> String

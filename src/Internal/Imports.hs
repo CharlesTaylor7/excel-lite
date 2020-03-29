@@ -14,9 +14,13 @@ module Internal.Imports
   , module Control.Monad.Except
   , identity
   , print
+  , putStr
+  , putStrLn
+  , getLine
   ) where
 
-import Prelude (putStr, putStrLn, maximum, enumFromTo, getLine, read, repeat, zipWith)
+import Prelude (enumFromTo)
+import qualified Prelude
 import Data.Monoid
 import Data.Ord
 import Data.Bifunctor
@@ -41,4 +45,13 @@ identity :: a -> a
 identity x = x
 
 print :: (MonadIO m, Show a) => a -> m ()
-print = liftIO . putStrLn . show
+print = putStrLn . show
+
+putStr :: MonadIO m => String -> m ()
+putStr = liftIO . Prelude.putStr
+
+putStrLn :: MonadIO m => String -> m ()
+putStrLn = liftIO . Prelude.putStrLn
+
+getLine :: MonadIO m => m String
+getLine = liftIO Prelude.getLine
