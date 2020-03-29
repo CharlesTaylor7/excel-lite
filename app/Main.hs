@@ -9,7 +9,6 @@ loop :: (MonadState SheetCells m, MonadIO m)
      => m ()
 loop = do
   sheet <- get
-  liftIO $ putStrLn "sheet: "
   prettyPrint sheet
   input <- promptUser
   runInput input
