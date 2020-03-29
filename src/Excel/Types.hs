@@ -31,9 +31,9 @@ data Cell = Cell
   , _cell_expr :: Expr
   }
 
-data Write = Write
-  { _write_cell :: CellId
-  , _write_expr :: Expr
+data Assignment = Assignment
+  { _assignment_cell :: CellId
+  , _assignment_expr :: Expr
   }
   deriving (Show, Eq)
 
@@ -43,15 +43,25 @@ data Sheet cell = Sheet
   }
   deriving (Show, Eq, Functor)
 
+data Input
+  = Expr Expr
+  | Assign Assignment
+  deriving (Show, Eq)
+
 type CellValue = Either EvalError Domain
 
 type SheetCells = Sheet Expr
 type SheetValues = Sheet CellValue
 
-makeLenses ''Expr
+-- isos
+makePrisms ''CellId
+
+-- lenses
 makeLenses ''Cell
 makeLenses ''Sheet
-makeLenses ''Write
+makeLenses ''Assignment
 
+-- prisms
+makePrisms ''Expr
 makePrisms ''EvalError
-makePrisms ''CellId
+makePrisms ''Input

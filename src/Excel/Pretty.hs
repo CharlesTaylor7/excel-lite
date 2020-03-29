@@ -23,7 +23,6 @@ instance Pretty SheetCells where
       cellIds = enumFromTo (CellId 0) $ sheet ^. sheet_maxId
       values = evalSheet sheet
       getCell sheet id = sheet ^? sheet_cells . ix id
-      anyCells = has (sheet_cells . folded) sheet
       prettify sheet = pretty . getCell sheet
       formatColumn = padToLongest . \id ->
         [ "$" <> show (id ^. _CellId)
@@ -31,14 +30,11 @@ instance Pretty SheetCells where
         , prettify values id
         ]
     in
-      if anyCells
-      then
-        cellIds
-        & map formatColumn
-        & transpose
-        & map (surround "| " " |" . intercalate " | ")
-        & intercalate "\n"
-      else "<empty sheet>"
+      cellIds
+      & map formatColumn
+      & transpose
+      & map (surround "| " " |" . intercalate " | ")
+      & intercalate "\n"
 
 surround :: Semigroup a => a -> a -> a -> a
 surround start end center = start <> center <> end
@@ -71,7 +67,7 @@ instance Pretty Expr where
   pretty (Exponent a b) =
     parensP a <> "^" <> parensP b
 
-parens a = "(" <> a <> ")"
+parens = surround "(" ")"
 parensP = parens . pretty
 
 instance Pretty CellId where
@@ -95,8 +91,8 @@ instance (Pretty a, Pretty b) => Pretty (Either a b) where
   pretty = pretty ||| pretty
 
 instance Pretty a => Pretty (Maybe a) where
-  pretty = maybe " " pretty
+  pretty = maybe "" pretty
 
 instance Pretty a => Pretty [a] where
-  pretty as = "(" <> join as <> ")"
+  pretty as = parens $ join as
     where join = intercalate ", " . map pretty

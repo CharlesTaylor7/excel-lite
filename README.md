@@ -8,3 +8,4 @@ I'm using this as opportunity to familiarize myself with lens & parsec.
 - Evaluate expressions at prompt
 - Implement clear cell command
 - Make sheet 2d
+

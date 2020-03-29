@@ -17,6 +17,10 @@ spec = do
             & setCell id1 (Lit 2)
             & setCell id2 (Lit 5)
             & setCell id3 (Exponent (Ref id1) (Ref id2))
-          expected = ""
+          expected = intercalate "\n"
+            [ "| $0 | $1 |    $2     |"
+            , "| 2  | 5  | ($0)^($1) |"
+            , "| 2  | 5  |    32     |"
+            ]
         in
           pretty sheet `shouldBe` expected

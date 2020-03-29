@@ -11,14 +11,31 @@ loop = do
   sheet <- get
   liftIO $ putStrLn "sheet: "
   prettyPrint sheet
-  write <- promptUser
-  modifySheet write
+  input <- promptUser
+  runInput input
   loop
 
-modifySheet :: MonadState SheetCells m => Write -> m ()
-modifySheet (Write id expr) = modify $ setCell id expr
+runInput :: (MonadState SheetCells m, MonadIO m)
+         => Input
+         -> m ()
+runInput = \case
+    Expr expr -> do
+      sheet <- get
+      let val = evalExpr expr $ sheet
+      prettyPrint val
+    Assign assignment ->
+      modifySheet assignment
 
-promptUser :: MonadIO m => m Write
+evalExpr :: Expr -> SheetCells -> CellValue
+evalExpr expr sheet =
+  eval expr
+  & flip evalStateT emptySheet
+  & flip runReader sheet
+
+modifySheet :: MonadState SheetCells m => Assignment -> m ()
+modifySheet (Assignment id expr) = modify $ setCell id expr
+
+promptUser :: MonadIO m => m Input
 promptUser = do
   liftIO $ putStrLn ">"
   line <- liftIO getLine

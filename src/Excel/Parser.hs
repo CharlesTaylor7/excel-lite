@@ -1,29 +1,31 @@
 module Excel.Parser
-  ( parseExpr
+  ( runParser
   , parseInput
-  )
-  where
+  ) where
 
-import Internal.Imports
+import Internal.Imports hiding (try)
 import Excel.Types
 
-import Text.ParserCombinators.Parsec hiding ((<|>))
+import Text.ParserCombinators.Parsec hiding ((<|>), runParser)
 import Text.ParserCombinators.Parsec.Expr
 import Text.ParserCombinators.Parsec.Language
+import qualified Text.ParserCombinators.Parsec as Parsec
 import qualified Text.ParserCombinators.Parsec.Token as Token
 
-parseInput :: String -> Either ParseError Write
-parseInput = runParser assignment () ""
+parseInput = runParser input
 
-parseExpr :: String -> Either ParseError Expr
-parseExpr = runParser expr () ""
+runParser :: Parser a -> String -> Either ParseError a
+runParser parser = Parsec.runParser parser () ""
 
-assignment :: Parser Write
+input :: Parser Input
+input = Assign <$> try assignment <|> fmap Expr expr
+
+assignment :: Parser Assignment
 assignment = do
   ref <- cellId
   reservedOp "="
   val <- expr
-  pure $ Write ref val
+  pure $ Assignment ref val
 
 expr :: Parser Expr
 expr = buildExpressionParser table term <?> "expression"
