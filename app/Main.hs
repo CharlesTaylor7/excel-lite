@@ -38,9 +38,6 @@ evalExpr expr sheet =
   & flip evalStateT emptySheet
   & flip runReader sheet
 
-modifySheet :: MonadState SheetCells m => Assignment -> m ()
-modifySheet (Assignment id expr) = modify $ setCell id expr
-
 promptUser :: MonadIO m => m Command
 promptUser = do
   putStrLn ">"

@@ -14,6 +14,9 @@ import qualified Text.ParserCombinators.Parsec.Token as Token
 parseInput :: String -> Either ParseError Command
 parseInput = runParser input
 
+parseExpr :: String -> Either ParseError Expr
+parseExpr = runParser expr
+
 runParser :: Parser a -> String -> Either ParseError a
 runParser parser = Parsec.runParser parser () ""
 
@@ -36,13 +39,6 @@ input :: Parser Command
 input =
   command
   <|> Eval <$> expr
-
-assignment :: Parser Assignment
-assignment = do
-  ref <- cellId
-  reservedOp "="
-  val <- expr
-  pure $ Assignment ref val
 
 expr :: Parser Expr
 expr = buildExpressionParser table term <?> "expression"

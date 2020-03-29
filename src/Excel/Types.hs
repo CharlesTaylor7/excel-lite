@@ -31,12 +31,6 @@ data Cell = Cell
   , _cell_expr :: Expr
   }
 
-data Assignment = Assignment
-  { _assignment_cell :: CellId
-  , _assignment_expr :: Expr
-  }
-  deriving (Show, Eq)
-
 data Sheet cell = Sheet
   { _sheet_cells :: Map CellId cell
   , _sheet_maxId :: CellId
@@ -61,7 +55,6 @@ makePrisms ''CellId
 -- lenses
 makeLenses ''Cell
 makeLenses ''Sheet
-makeLenses ''Assignment
 
 -- prisms
 makePrisms ''Expr
