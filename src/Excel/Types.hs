@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Excel.Types where
 
+import Data.Functor.Foldable.TH
 import Internal.Imports
 import qualified RIO.Map as Map
 
@@ -61,3 +62,6 @@ makeLenses ''Sheet
 makePrisms ''Expr
 makePrisms ''EvalError
 makePrisms ''Command
+
+-- recursion schemes
+makeBaseFunctor ''Expr

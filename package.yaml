@@ -24,27 +24,28 @@ dependencies:
 - lens
 - mtl
 - parsec
+- recursion-schemes
 
 default-extensions:
   - NoImplicitPrelude
-  - AllowAmbiguousTypes
-  - TypeApplications
-  - GeneralizedNewtypeDeriving
-  - DeriveGeneric
-  - DerivingStrategies
-  - DeriveFunctor
-  - MultiParamTypeClasses
-  - PartialTypeSignatures
-  - MonoLocalBinds
-  - TupleSections
-  - ScopedTypeVariables
-  - RankNTypes
   - OverloadedLists
   - OverloadedStrings
-  - GADTs
+  - MonoLocalBinds
+  - AllowAmbiguousTypes
+  - ScopedTypeVariables
+  - TypeApplications
   - LambdaCase
+  - TupleSections
+  - DeriveGeneric
+  - DeriveTraversable
+  - DerivingStrategies
+  - GeneralizedNewtypeDeriving
+  - MultiParamTypeClasses
+  - PartialTypeSignatures
+  - RankNTypes
+  - GADTs
   - FlexibleContexts
-  - ConstraintKinds
+  - TypeFamilies
 
 ghc-options:
   - -Wno-deprecations
