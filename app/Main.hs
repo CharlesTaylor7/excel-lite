@@ -5,7 +5,7 @@ def spirals():
   current = 1
   increment = 0
   yield 1
-  for i in xrange(1001):
+  for i in xrange(501):
     increment += 2
     for _ in xrange(4):
       current += increment
@@ -16,6 +16,7 @@ def spiral_sum:
   for x in spirals():
     sum += x
 --}
+{-# LANGUAGE NoOverloadedLists #-}
 module Main where
 import Data.IORef
 import Data.Foldable
@@ -24,17 +25,14 @@ import Prelude
 modifyRead :: IORef a -> (a -> a) -> IO a
 modifyRead ref f = modifyIORef' ref f >> readIORef ref
 
-int :: Int -> Int
-int = id
-
 main :: IO ()
 main = do
-  sumRef <- newIORef $ int 0
-  incrementRef <- newIORef $ int 0
-  currentRef <- newIORef $ int 1
-  for_ [1..1001] $ do
+  sumRef <- newIORef (1 :: Int)
+  incrementRef <- newIORef 0
+  currentRef <- newIORef 1
+  for_ [1..500] $ \_ -> do
     increment <- modifyRead incrementRef (+ 2)
-    for_ [1..4] $ do
+    for_ [1..4] $ \_ -> do
       current <- modifyRead currentRef (+ increment)
       modifyIORef' sumRef (+ current)
 
