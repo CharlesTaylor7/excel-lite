@@ -46,6 +46,7 @@ data Command
 
 type CellValue = Either EvalError Domain
 
+type SheetInput = Sheet Text
 type SheetCells = Sheet Expr
 type SheetValues = Sheet CellValue
 

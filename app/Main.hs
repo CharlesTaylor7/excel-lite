@@ -41,6 +41,7 @@ evalExpr expr sheet =
 promptUser :: MonadIO m => m Command
 promptUser = do
   putStrLn ">"
+  putStr "foo"
   line <- getLine
   case parseInput line of
     Left err -> prettyPrint err >> promptUser
