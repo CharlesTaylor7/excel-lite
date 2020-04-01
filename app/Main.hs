@@ -18,8 +18,8 @@ def spiral_sum:
 --}
 {-# LANGUAGE NoOverloadedLists #-}
 module Main where
-import Control.Monad.ST.Strict
-import Data.STRef.Strict
+import Control.Monad.ST
+import Data.STRef
 import Data.Foldable
 import Prelude
 
@@ -31,7 +31,7 @@ modifyRead ref f = modifySTRef' ref f >> readSTRef ref
 
 diagonalSpiralSum :: Int
 diagonalSpiralSum = runST $ do
-  sumRef <- newSTRef (1 :: Int)
+  sumRef <- newSTRef 1
   incrementRef <- newSTRef 0
   currentRef <- newSTRef 1
   for_ [1..500] $ \_ -> do
@@ -39,5 +39,4 @@ diagonalSpiralSum = runST $ do
     for_ [1..4] $ \_ -> do
       current <- modifyRead currentRef (+ increment)
       modifySTRef' sumRef (+ current)
-
   readSTRef sumRef
