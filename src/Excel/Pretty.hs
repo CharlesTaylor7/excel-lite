@@ -6,7 +6,7 @@ import Excel.Types
 import Excel.Operations
 
 import Text.Parsec (ParseError(..))
-
+import Data.Functor.Foldable
 
 prettyPrint :: MonadIO m => Pretty a => a -> m ()
 prettyPrint = putStrLn . pretty
@@ -54,21 +54,20 @@ padToCenter m text = padding start <> text <> padding end
     padding = flip replicate ' '
 
 instance Pretty Expr where
-  pretty (Lit x) = pretty x
-  pretty (Ref id) = pretty id
-  pretty (Add a b) =
-    parensP a <> "+" <> parensP b
-  pretty (Subtract a b) =
-    parensP a <> "-" <> parensP b
-  pretty (Multiply a b) =
-    parensP a <> "*" <> parensP b
-  pretty (Divide a b) =
-    parensP a <> "/" <> parensP b
-  pretty (Exponent a b) =
-    parensP a <> "^" <> parensP b
+  pretty = cata prettyF
 
+prettyF :: ExprF String -> String
+prettyF = \case
+  LitF x -> pretty x
+  RefF id -> pretty id
+  AddF a b -> parens a <> " + " <> parens b
+  SubtractF a b -> parens a <> " - " <> parens b
+  MultiplyF a b -> parens a <> " * " <> parens b
+  DivideF a b -> parens a <> " / " <> parens b
+  ExponentF a b -> parens a <> " ^ " <> parens b
+
+parens :: String -> String
 parens = surround "(" ")"
-parensP = parens . pretty
 
 instance Pretty CellId where
   pretty = ('$':) . show . view _CellId
@@ -94,5 +93,12 @@ instance Pretty a => Pretty (Maybe a) where
   pretty = maybe "" pretty
 
 instance Pretty a => Pretty [a] where
-  pretty as = parens $ join as
-    where join = intercalate ", " . map pretty
+  pretty = brackets . cata (joinF ", ") . map pretty
+
+joinF :: Monoid a => a -> ListF a a -> a
+joinF separator = \case
+  Nil -> mempty
+  Cons a b -> a <> separator <> b
+
+brackets :: String -> String
+brackets = surround "[" "]"
