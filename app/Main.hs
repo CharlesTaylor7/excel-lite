@@ -18,31 +18,26 @@ def spiral_sum:
 --}
 {-# LANGUAGE NoOverloadedLists #-}
 module Main where
-import Data.IORef
+import Control.Monad.ST.Strict
+import Data.STRef.Strict
 import Data.Foldable
 import Prelude
 
-modifyRead :: IORef a -> (a -> a) -> IO a
-modifyRead ref f = modifyIORef' ref f >> readIORef ref
-
 main :: IO ()
-main = do
-  sumRef <- newIORef (1 :: Int)
-  incrementRef <- newIORef 0
-  currentRef <- newIORef 1
+main = print diagonalSpiralSum
+
+modifyRead :: STRef s a -> (a -> a) -> ST s a
+modifyRead ref f = modifySTRef' ref f >> readSTRef ref
+
+diagonalSpiralSum :: Int
+diagonalSpiralSum = runST $ do
+  sumRef <- newSTRef (1 :: Int)
+  incrementRef <- newSTRef 0
+  currentRef <- newSTRef 1
   for_ [1..500] $ \_ -> do
     increment <- modifyRead incrementRef (+ 2)
     for_ [1..4] $ \_ -> do
       current <- modifyRead currentRef (+ increment)
-      modifyIORef' sumRef (+ current)
+      modifySTRef' sumRef (+ current)
 
-  sum <- readIORef sumRef
-  print sum
-{--
-newtype Prev = Prev Int
-newtype Inc = Inc Int
-
-next :: Prev -> Inc -> [Int]
-next (Prev p) (Inc i) = [p+i, p+2*i, p+3*i, p + 4*i]
-
---}
+  readSTRef sumRef
