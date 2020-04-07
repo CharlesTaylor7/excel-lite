@@ -1,5 +1,6 @@
 module Internal.Imports
   ( module Prelude
+  , module Reflex
   , module Control.Arrow
   , module Control.Lens
   , module Data.Bifunctor
@@ -21,6 +22,7 @@ module Internal.Imports
 
 import Prelude (enumFromTo)
 import qualified Prelude
+import Reflex
 import Data.Monoid
 import Data.Ord
 import Data.Bifunctor
@@ -31,7 +33,7 @@ import Data.Coerce(coerce)
 import Numeric.Natural
 
 -- rio
-import RIO hiding (Lens, Lens', Getting, ASetter, ASetter', lens, (^.), to, view, over, set, sets, first, second, id)
+import RIO hiding (Lens, Lens', Getting, ASetter, ASetter', lens, (^.), to, view, over, set, sets, first, second, id, mapMaybe, traceEvent)
 import RIO.List (unzip)
 
 -- lens

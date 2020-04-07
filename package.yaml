@@ -25,6 +25,7 @@ dependencies:
 - mtl
 - parsec
 - recursion-schemes
+- reflex
 
 default-extensions:
   - NoImplicitPrelude

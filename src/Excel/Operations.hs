@@ -73,7 +73,7 @@ eval = \case
     runOpGuards op pair1 pair2 =
       runExceptT $ liftA2 op (proc' pair1) (proc' pair2)
 
-    proc' (exp, guard) = apply guard . proc $ exp
+    proc' (exp, guard) = applyGuard guard . proc $ exp
 
 data Guard f a = Guard
   { _guard_cond :: a -> Bool
@@ -89,8 +89,8 @@ negativeExponentGuard = Guard (< 0) (const $ throwError NegativeExponent)
 noGuard :: Applicative m => Guard m a
 noGuard = Guard (const False) (const $ pure ())
 
-apply :: Monad m => Guard m a -> m a -> m a
-apply (Guard cond act) m_a = do
+applyGuard :: Monad m => Guard m a -> m a -> m a
+applyGuard (Guard cond act) m_a = do
   a <- m_a
   when (cond a) $ act a
   pure a
