@@ -5,12 +5,19 @@
 
 packages:
 - completed:
-    hackage: reflex-0.7.0.0@sha256:b7c00263a97925045d9c05c47979b46850935f7ba01b775d728cf357b373e611,11192
+    hackage: reflex-basic-host-0.2.0.1@sha256:b416c9c8f0379a4e8e6d4b9596eed41f974ef84afde579da29b65d9e4c687f85,2955
     pantry-tree:
-      size: 4463
-      sha256: 03e0d44b78c799daee330fbbcc6a0d89c4166619070cc3f524122c81b31ac157
+      size: 455
+      sha256: fcc5c45566db23372bae0abf841d0d7896202d917b5c3111ddd2b4c3d5b44977
   original:
-    hackage: reflex-0.7.0.0
+    hackage: reflex-basic-host-0.2.0.1
+- completed:
+    hackage: reflex-0.6.4.1@sha256:43e64b9fe2dd471007173aa1c4e02effcae3cafeb3ea972edf1ea65476cf321d,11192
+    pantry-tree:
+      size: 4461
+      sha256: a6ec3e337a799d5981d9ae38f2c7418ac9daba22c3e49f5b9f5b8a908c9ed84e
+  original:
+    hackage: reflex-0.6.4.1
 - completed:
     hackage: constraints-extras-0.3.0.2@sha256:bf6884be65958e9188ae3c9e5547abfd6d201df021bff8a4704c2c4fe1e1ae5b,1784
     pantry-tree:

@@ -38,7 +38,8 @@ packages:
 # using the same syntax as the packages field.
 # (e.g., acme-missiles-0.3)
 extra-deps:
-- reflex-0.7.0.0
+- reflex-basic-host-0.2.0.1
+- reflex-0.6.4.1
 - constraints-extras-0.3.0.2
 - dependent-map-0.3.1.0
 - dependent-sum-0.6.2.0
