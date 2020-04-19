@@ -6,15 +6,30 @@ import qualified RIO.Map as Map
 
 type Domain = Int
 
-data Expr where
-  Lit :: Domain -> Expr
-  Ref :: CellId -> Expr
-  Add :: Expr -> Expr -> Expr
-  Subtract :: Expr -> Expr -> Expr
-  Multiply :: Expr -> Expr -> Expr
-  Divide :: Expr -> Expr -> Expr
-  Exponent :: Expr -> Expr -> Expr
+data Expr
+  = Lit Domain
+  | Ref CellId
+  | Add Expr Expr
+  | Subtract Expr Expr
+  | Multiply Expr Expr
+  | Divide Expr Expr
+  | Exponent Expr Expr
   deriving (Show, Eq)
+
+-- data Expr
+  -- = case Lit of Domain
+  -- | case Ref of CellId
+  -- | case Add of (Expr, Expr)
+
+-- data Expr where
+--   Lit :: Domain -> Expr
+--   Ref :: CellId -> Expr
+--   Add :: Expr -> Expr -> Expr
+--   Subtract :: Expr -> Expr -> Expr
+--   Multiply :: Expr -> Expr -> Expr
+--   Divide :: Expr -> Expr -> Expr
+--   Exponent :: Expr -> Expr -> Expr
+--   deriving (Show, Eq)
 
 data EvalError
   = InvalidRef
